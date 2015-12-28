@@ -1,4 +1,10 @@
 # common-bundle
+[![version](https://img.shields.io/npm/v/common-bundle.svg)](https://www.npmjs.org/package/common-bundle)
+[![status](https://travis-ci.org/zoubin/common-bundle.svg?branch=master)](https://travis-ci.org/zoubin/common-bundle)
+[![coverage](https://img.shields.io/coveralls/zoubin/common-bundle.svg)](https://coveralls.io/github/zoubin/common-bundle)
+[![dependencies](https://david-dm.org/zoubin/common-bundle.svg)](https://david-dm.org/zoubin/common-bundle)
+[![devDependencies](https://david-dm.org/zoubin/common-bundle/dev-status.svg)](https://david-dm.org/zoubin/common-bundle#info=devDependencies)
+
 A [`browserify`] plugin for packing modules into common shared bundles.
 
 Features:

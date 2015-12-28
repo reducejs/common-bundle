@@ -1,21 +1,8 @@
 {
+  "name": "common-bundle",
+  "version": "0.0.1",
+  "description": "A browserify plugin for packing modules into common shared bundles.",
   "main": "index.js",
-  "scripts": {
-    "test": "npm run lint && tap --cov test/*.js",
-    "lint": "eslint *.js 'lib/**/*.js' test/*.js bin/*.js",
-    "coveralls": "COVERALLS_REPO_TOKEN=REPO_TOKEN npm test"
-  },
-  "devDependencies": {
-    "browserify": "^12.0.1",
-    "callback-sequence": "^3.2.0",
-    "concat-stream": "^1.5.1",
-    "del": "^2.2.0",
-    "eslint": "^1.10.3",
-    "glob": "^6.0.2",
-    "tap": "^2.3.4",
-    "vinyl-fs": "^2.2.1",
-    "watchify": "^3.6.1"
-  },
   "dependencies": {
     "browser-pack": "^6.0.1",
     "deps-topo-sort2": "^1.0.0",
@@ -28,5 +15,36 @@
     "stream-combiner2": "^1.1.1",
     "through2": "^2.0.0",
     "vinyl-source-stream": "^1.1.0"
-  }
+  },
+  "devDependencies": {
+    "browserify": "^12.0.1",
+    "callback-sequence": "^3.2.0",
+    "concat-stream": "^1.5.1",
+    "del": "^2.2.0",
+    "eslint": "^1.10.3",
+    "glob": "^6.0.2",
+    "tap": "^2.3.4",
+    "vinyl-fs": "^2.2.1",
+    "watchify": "^3.6.1"
+  },
+  "scripts": {
+    "test": "npm run lint && tap --cov test/*.js",
+    "lint": "eslint *.js 'lib/**/*.js' test/*.js bin/*.js",
+    "coveralls": "COVERALLS_REPO_TOKEN=fyEg54sM1OUyF62IYKJ8X3IfmQlDXzv39 npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoubin/common-bundle.git"
+  },
+  "keywords": [
+    "browserify-plugin",
+    "common",
+    "bundle"
+  ],
+  "author": "zoubin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zoubin/common-bundle/issues"
+  },
+  "homepage": "https://github.com/zoubin/common-bundle#readme"
 }
