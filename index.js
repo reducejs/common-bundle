@@ -54,7 +54,7 @@ module.exports = function (b, opts) {
       vinylStream.end()
       next()
     }))
-    b.pipeline.splice('wrap', 0, output)
+    b.pipeline.push(output)
 
     if (needRecords) {
       groups = []

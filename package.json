@@ -11,8 +11,10 @@
     "concat-stream": "^1.5.1",
     "del": "^2.2.0",
     "eslint": "^1.10.3",
+    "glob": "^6.0.2",
     "tap": "^2.3.4",
-    "vinyl-fs": "^2.2.1"
+    "vinyl-fs": "^2.2.1",
+    "watchify": "^3.6.1"
   },
   "dependencies": {
     "browser-pack": "^6.0.1",
