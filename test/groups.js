@@ -36,11 +36,11 @@ test('groupFilter.entries', function(tt) {
   ))
 
   tt.test('object, pattern', run.bind(null, {
-    entries: '**/page/**/index.js',
+    filter: '**/page/**/index.js',
   }))
 
   tt.test('object, array of patterns', run.bind(null, {
-    entries: ['**/*.js', '!**/C/index.js'],
+    filter: ['**/*.js', '!**/C/index.js'],
   }))
 
   tt.test('multiple', run.bind(
@@ -48,8 +48,8 @@ test('groupFilter.entries', function(tt) {
   ))
 
   tt.test('object, multiple', run.bind(null, [
-    { entries: '**/page/A/*.js' },
-    { entries: '**/page/B/*.js' },
+    { filter: '**/page/A/*.js' },
+    { filter: '**/page/B/*.js' },
   ]))
 
   tt.end()
@@ -87,14 +87,14 @@ test('groupFilter.output', function(tt) {
   }
 
   tt.test('function', run.bind(null, {
-    output: function (row) {
-      if (/A/.test(row.file)) {
+    output: function (file) {
+      if (/A/.test(file)) {
         return 'A.js'
       }
-      if (/B/.test(row.file)) {
+      if (/B/.test(file)) {
         return 'B.js'
       }
-      if (/C/.test(row.file)) {
+      if (/C/.test(file)) {
         return 'C.js'
       }
     },
@@ -102,15 +102,15 @@ test('groupFilter.output', function(tt) {
 
   tt.test('string', run.bind(null, [
     {
-      entries: '**/A/index.js',
+      filter: '**/A/index.js',
       output: 'A.js',
     },
     {
-      entries: '**/B/index.js',
+      filter: '**/B/index.js',
       output: 'B.js',
     },
     {
-      entries: '**/C/index.js',
+      filter: '**/C/index.js',
       output: 'C.js',
     },
   ]))
@@ -124,11 +124,11 @@ test('groupFilter.one2multiple', function(t) {
     groupFilter: [
       '**/page/**/index.js',
       {
-        entries: '**/page/A/index.js',
+        filter: '**/page/A/index.js',
         output: 'bundle.js',
       },
       {
-        entries: '**/page/B/index.js',
+        filter: '**/page/B/index.js',
         output: 'bundle.js',
       },
     ],
