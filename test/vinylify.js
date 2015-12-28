@@ -12,7 +12,7 @@ var ROWS = [
     id: '/path/to/src/page/A/index.css',
     source: 'a{}',
     deps: {
-      'C': '/path/to/node_modules/C/index.css',
+      C: '/path/to/node_modules/C/index.css',
     },
   },
   {
@@ -20,7 +20,7 @@ var ROWS = [
     id: '/path/to/src/page/B/index.css',
     source: 'b{}',
     deps: {
-      'C': '/path/to/node_modules/C/index.css',
+      C: '/path/to/node_modules/C/index.css',
     },
   },
   {

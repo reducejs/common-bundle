@@ -10,7 +10,7 @@ var fixtures = path.resolve.bind(path, __dirname, 'fixtures')
 var build = fixtures('build')
 var fs = require('fs')
 
-test('multiple', function(t) {
+test('needRecords', function(t) {
   return run([
     function () {
       return del(build)
@@ -18,7 +18,6 @@ test('multiple', function(t) {
     function () {
       return browserify(['./a.js', './b.js'], { basedir: fixtures('src') })
         .plugin(commonify, {
-          groups: ['**/a.js', '**/b.js'],
           common: {
             filter: ['a.js', 'b.js'],
             output: 'common.js',

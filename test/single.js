@@ -29,7 +29,7 @@ test('single', function(t) {
         read(fixtures('expected', 'single', 'bundle.js'))
       )
       t.end()
-    }
+    },
   ])
 })
 

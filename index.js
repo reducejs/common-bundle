@@ -39,20 +39,19 @@ module.exports = function (b, opts) {
         ])
       },
     })
-    vinylStream.pipe(thr.obj(function (file, _, next) {
+    vinylStream.pipe(thr.obj(function (file, _, cb) {
       output.push(file)
-      next()
-    }, function (next) {
+      cb()
+    }, function (cb) {
       output.push(null)
-      next()
+      cb()
     }))
-    
-    b.pipeline.get('pack').unshift(thr.obj(function (row, _, next) {
+    b.pipeline.get('pack').unshift(thr.obj(function (row, _, cb) {
       vinylStream.write(row)
-      next()
-    }, function (next) {
+      cb()
+    }, function (cb) {
       vinylStream.end()
-      next()
+      cb()
     }))
     b.pipeline.push(output)
 

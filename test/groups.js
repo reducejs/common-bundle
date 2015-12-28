@@ -1,6 +1,6 @@
 var test = require('tap').test
 var Groups = require('../lib/groups')
-var createReadable = require('../lib/readable')
+var thr = require('through2')
 
 test('groupFilter.entries', function(tt) {
   function run(filter, t) {
@@ -8,17 +8,17 @@ test('groupFilter.entries', function(tt) {
       basedir: '/path/to/src',
       groupFilter: filter,
     })
-    groups.once('groups', function (groups) {
-      t.same(Object.keys(groups).length, 2)
+    groups.once('groups', function (groupsMap) {
+      t.same(Object.keys(groupsMap).length, 2)
       t.same(
-        groups['page/A/index.js'].sort(),
+        groupsMap['page/A/index.js'].sort(),
         [
           '/path/to/node_modules/C/index.js',
           '/path/to/src/page/A/index.js',
         ]
       )
       t.same(
-        groups['page/B/index.js'].sort(),
+        groupsMap['page/B/index.js'].sort(),
         [
           '/path/to/node_modules/C/index.js',
           '/path/to/src/page/B/index.js',
@@ -61,24 +61,24 @@ test('groupFilter.output', function(tt) {
       basedir: '/path/to/src',
       groupFilter: filter,
     })
-    groups.once('groups', function (groups) {
-      t.same(Object.keys(groups).length, 3)
+    groups.once('groups', function (groupsMap) {
+      t.same(Object.keys(groupsMap).length, 3)
       t.same(
-        groups['A.js'].sort(),
+        groupsMap['A.js'].sort(),
         [
           '/path/to/node_modules/C/index.js',
           '/path/to/src/page/A/index.js',
         ]
       )
       t.same(
-        groups['B.js'].sort(),
+        groupsMap['B.js'].sort(),
         [
           '/path/to/node_modules/C/index.js',
           '/path/to/src/page/B/index.js',
         ]
       )
       t.same(
-        groups['C.js'],
+        groupsMap['C.js'],
         ['/path/to/node_modules/C/index.js']
       )
       t.end()
@@ -119,7 +119,7 @@ test('groupFilter.output', function(tt) {
 })
 
 test('groupFilter.one2multiple', function(t) {
-  var groups = new Groups({
+  var groupsStream = new Groups({
     basedir: '/path/to/src',
     groupFilter: [
       '**/page/**/index.js',
@@ -133,7 +133,7 @@ test('groupFilter.one2multiple', function(t) {
       },
     ],
   })
-  groups.once('groups', function (groups) {
+  groupsStream.once('groups', function (groups) {
     t.same(Object.keys(groups).length, 3)
     t.same(
       groups['page/A/index.js'].sort(),
@@ -158,30 +158,83 @@ test('groupFilter.one2multiple', function(t) {
     )
     t.end()
   })
-  source().pipe(groups)
+  source().pipe(groupsStream)
+})
+
+test('stray modules', function(t) {
+  var groupsStream = new Groups({
+    basedir: '/path/to/src',
+    groupFilter: [
+      {
+        filter: '**/page/A/index.js',
+      },
+      {
+        filter: '**/page/B/index.js',
+      },
+    ],
+  })
+  groupsStream.once('groups', function (groups) {
+    t.same(Object.keys(groups).length, 2)
+    t.same(
+      groups['page/A/index.js'].sort(),
+      [
+        '/path/to/node_modules/C/index.js',
+        '/path/to/node_modules/E/index.js',
+        '/path/to/src/page/A/index.js',
+        '/path/to/src/page/D/index.js',
+      ]
+    )
+    t.same(
+      groups['page/B/index.js'].sort(),
+      [
+        '/path/to/node_modules/C/index.js',
+        '/path/to/node_modules/E/index.js',
+        '/path/to/src/page/B/index.js',
+        '/path/to/src/page/D/index.js',
+      ]
+    )
+    t.end()
+  })
+  groupsStream.write({
+    id: '/path/to/src/page/D/index.js',
+    file: '/path/to/src/page/D/index.js',
+    deps: {
+      E: '/path/to/node_modules/E/index.js',
+    },
+  })
+  groupsStream.write({
+    id: '/path/to/node_modules/E/index.js',
+    file: '/path/to/node_modules/E/index.js',
+  })
+  source().on('data', function (row) {
+    groupsStream.write(row)
+  })
+  .on('end', function () {
+    groupsStream.end()
+  })
 })
 
 function source() {
-  var ret = createReadable()
-  ret.push({
+  var ret = thr.obj()
+  ret.write({
     id: '/path/to/src/page/A/index.js',
     file: '/path/to/src/page/A/index.js',
     deps: {
-      'C': '/path/to/node_modules/C/index.js',
+      C: '/path/to/node_modules/C/index.js',
     },
   })
-  ret.push({
+  ret.write({
     id: '/path/to/src/page/B/index.js',
     file: '/path/to/src/page/B/index.js',
     deps: {
-      'C': '/path/to/node_modules/C/index.js',
+      C: '/path/to/node_modules/C/index.js',
     },
   })
-  ret.push({
+  ret.write({
     id: '/path/to/node_modules/C/index.js',
     file: '/path/to/node_modules/C/index.js',
   })
-  ret.push(null)
+  ret.end()
   return ret
 }
 
