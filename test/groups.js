@@ -86,18 +86,16 @@ test('groupFilter.output', function(tt) {
     source().pipe(groups)
   }
 
-  tt.test('function', run.bind(null, {
-    output: function (file) {
-      if (/A/.test(file)) {
-        return 'A.js'
-      }
-      if (/B/.test(file)) {
-        return 'B.js'
-      }
-      if (/C/.test(file)) {
-        return 'C.js'
-      }
-    },
+  tt.test('function', run.bind(null, function (file) {
+    if (/A/.test(file)) {
+      return 'A.js'
+    }
+    if (/B/.test(file)) {
+      return 'B.js'
+    }
+    if (/C/.test(file)) {
+      return 'C.js'
+    }
   }))
 
   tt.test('string', run.bind(null, [

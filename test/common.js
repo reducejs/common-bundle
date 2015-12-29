@@ -27,10 +27,7 @@ var originalGroupsMap = {
 
 test('one common for all', function(t) {
   t.same(
-    common(originalGroupsMap, {
-      output: 'common.js',
-      filter: '**/*.js',
-    }),
+    common(originalGroupsMap, 'common.js'),
     {
       'page/A/index.js': [
         '/path/to/src/page/A/index.js',

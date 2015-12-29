@@ -40,6 +40,7 @@ module.exports = function (b, opts) {
       },
     })
     vinylStream.pipe(thr.obj(function (file, _, cb) {
+      b.emit('log', 'New bundle: ' + file.relative)
       output.push(file)
       cb()
     }, function (cb) {
