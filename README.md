@@ -45,7 +45,7 @@ b.bundle().pipe(vfs.dest('/path/to/build'))
 
 ![one-bundle-for-each-page](example/images/no-common.png)
 
-### One additional bundle shared by all page bundles
+### One additional bundle shared by all page-specific bundles
 
 ```javascript
 var browserify = require('browserify')
@@ -83,7 +83,7 @@ The default output of [`factor-bundle`] would be:
 **NOTE**:
 [`factor-bundle`] may pack modules, that are not needed by some pages, into the common bundle. `common-bundle` will try to make sure every page load only necessary modules.
 
-### Shared bundle for each group of pages
+### Shared bundle for each group of page-specific bundles
 
 ```javascript
 var browserify = require('browserify')
@@ -292,7 +292,7 @@ var b = browserify(entries, opts)
 function bundle() {
   return b.bundle()
 
-    .pipe(throug.obj(function (file, _, next) {
+    .pipe(through.obj(function (file, _, next) {
       // Log bundles created
       b.emit('log', file.relative)
       next(null, file)
