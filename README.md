@@ -7,102 +7,117 @@
 
 A [`browserify`] plugin for packing modules into common shared bundles.
 
-Features:
+**Features**:
+
 * Group one or more entries (modules) together to create a bundle.
 * Extract common modules from bundles to create additional shared bundles.
 * `b.bundle()` generates a stream flowing [`vinyl`] file objects.
 
 ## Example
 
-**input**
+**input**:
 
-```
-⌘ tree example/src/
-example/src/
-├── node_modules
-│   ├── color
-│   │   └── index.js
-│   └── say
-│       └── index.js
-└── page
-    ├── green
-    │   └── index.js
-    ├── hello
-    │   └── index.js
-    ├── hi
-    │   └── index.js
-    └── red
-        └── index.js
+![input](example/images/input.png)
 
-```
-
-**Dependency graph**:
-
-```
-page/green/index.js -> node_modules/color/index.js
-page/red/index.js -> node_modules/color/index.js
-page/hi/index.js -> node_modules/say/index.js
-page/hello/index.js -> node_modules/say/index.js
-
-```
-
-We can create one bundle for each page,
-and another two bundles to be shared (
-`color.js` for page `green` and `red`,
-`say.js` for page `hi` and `hello`
-).
+### One bundle for each page
 
 ```javascript
 var browserify = require('browserify')
-var vfs = require('vinyl-fs')
-var del = require('del')
 var glob = require('glob')
-var path = require('path')
-
-var basedir = path.resolve(__dirname, 'src')
+ 
+var basedir = '/path/to/src'
 var entries = glob.sync('page/**/index.js', { cwd: basedir })
-
 var b = browserify(entries, { basedir: basedir })
-
-b.plugin(require('common-bundle'), {
+ 
+b.plugin('common-bundle', {
+  // Each index.js packed into a new bundle
+  // with path page/**/index.js
   groups: '**/page/**/index.js',
-  common: [
-    {
-      output: 'color.js',
-      filter: ['page/red/index.js', 'page/green/index.js'],
-    },
-    {
-      output: 'say.js',
-      filter: ['page/hi/index.js', 'page/hello/index.js'],
-    },
-  ],
 })
-
-var build = path.resolve(__dirname, 'build')
-del.sync(build)
-b.bundle().pipe(vfs.dest(build))
-
+ 
+var vfs = require('vinyl-fs')
+// Write all bundles to the build directory
+b.bundle().pipe(vfs.dest('/path/to/build'))
 
 ```
 
 **output**:
 
-```
-⌘ tree example/build/
-example/build/
-├── color.js
-├── page
-│   ├── green
-│   │   └── index.js
-│   ├── hello
-│   │   └── index.js
-│   ├── hi
-│   │   └── index.js
-│   └── red
-│       └── index.js
-└── say.js
+![one-bundle-for-each-page](example/images/no-common.png)
+
+### One additional bundle shared by all page bundles
+
+```javascript
+var browserify = require('browserify')
+var glob = require('glob')
+ 
+var basedir = '/path/to/src'
+var entries = glob.sync('page/**/index.js', { cwd: basedir })
+var b = browserify(entries, { basedir: basedir })
+ 
+b.plugin('common-bundle', {
+  // Each index.js packed into a new bundle with path page/**/index.js
+  groups: '**/page/**/index.js',
+
+  common: {
+    output: 'common.js',
+    filter: '**/*.js',
+  },
+})
+ 
+var vfs = require('vinyl-fs')
+// Write all bundles to the build directory
+b.bundle().pipe(vfs.dest('/path/to/build'))
 
 ```
+
+**output**:
+
+![one-common](example/images/one-common.png)
+
+#### [`factor-bundle`]
+The default output of [`factor-bundle`] would be:
+
+![factor-bundle](example/images/factor-bundle.png)
+
+**NOTE**:
+[`factor-bundle`] may pack modules, that are not needed by some pages, into the common bundle. `common-bundle` will try to make sure every page load only necessary modules.
+
+### Shared bundle for each group of pages
+
+```javascript
+var browserify = require('browserify')
+var glob = require('glob')
+ 
+var basedir = '/path/to/src'
+var entries = glob.sync('page/**/index.js', { cwd: basedir })
+var b = browserify(entries, { basedir: basedir })
+ 
+b.plugin('common-bundle', {
+  // Each index.js packed into a new bundle with path page/**/index.js
+  groups: '**/page/**/index.js',
+
+  common: [
+    {
+      output: 'common-hello-and-hi.js',
+      filter: ['page/hello/index.js', 'page/hi/index.js']
+    },
+    {
+      output: 'common-red-and-green.js',
+      filter: ['page/red/index.js', 'page/green/index.js']
+    },
+  ],
+})
+ 
+var vfs = require('vinyl-fs')
+// Write all bundles to the build directory
+b.bundle().pipe(vfs.dest('/path/to/build'))
+
+```
+
+**output**:
+
+![multiple-commons](example/images/multiple-commons.png)
 
 ## Usage
 
@@ -300,6 +315,7 @@ gulp.task('watch', function () {
 ```
 
 [`browserify`]: https://github.com/substack/node-browserify
+[`factor-bundle`]: https://github.com/substack/factor-bundle
 [`vinyl`]: https://github.com/gulpjs/vinyl
 [`watchify`]: https://github.com/substack/watchify
 [`gulp`]: https://github.com/gulpjs/gulp

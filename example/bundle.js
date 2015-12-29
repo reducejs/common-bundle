@@ -7,17 +7,20 @@ var path = require('path')
 var basedir = path.resolve(__dirname, 'src')
 var entries = glob.sync('page/**/index.js', { cwd: basedir })
 
-var b = browserify(entries, { basedir: basedir })
+var b = browserify(entries, {
+  basedir: basedir,
+  paths: [path.resolve(__dirname, 'src', 'web_modules')],
+})
 
 b.plugin(require('..'), {
   groups: '**/page/**/index.js',
   common: [
     {
-      output: 'color.js',
+      output: 'common-red-and-green.js',
       filter: ['page/red/index.js', 'page/green/index.js'],
     },
     {
-      output: 'say.js',
+      output: 'common-hello-and-hi.js',
       filter: ['page/hi/index.js', 'page/hello/index.js'],
     },
   ],

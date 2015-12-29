@@ -1,3 +1,4 @@
+require('lodash')
 module.exports = {
   red: '#FF0000',
   green: '#00FF00',
