@@ -1,4 +1,4 @@
-var mixy = require('mixy')
+var mix = require('mixy')
 var thr = require('through2')
 var pack = require('browser-pack')
 var splicer = require('labeled-stream-splicer')
@@ -10,7 +10,7 @@ module.exports = function (b, opts) {
 
   var basedir = opts.basedir || b._options.basedir || process.cwd()
   var needRecords = !opts.groups
-  var packOpts = mixy.mix({}, b._options, {
+  var packOpts = mix({}, b._options, {
     raw: true,
     hasExports: true,
   })
@@ -32,9 +32,12 @@ module.exports = function (b, opts) {
       basedir: basedir,
       groupFilter: groups,
       common: opts.common,
-      pack: function () {
+      pack: function (bundleID) {
+        var options = mix({}, packOpts, {
+          to: bundleID,
+        })
         return splicer.obj([
-          'pack', [ packer(packOpts) ],
+          'pack', [ packer(options) ],
           'wrap', [],
         ])
       },
