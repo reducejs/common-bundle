@@ -281,6 +281,21 @@ See the [`groups`](#groups) options for more information.
 
 Type: `String`
 
+### Events
+
+#### b.on('common.pipeline', function (id, pipeline) {})
+
+Every time a bundle created, a `common.pipeline` event is emitted with its `id` and the packing `pipeline`.
+
+A `pipeline` is a [labeled-stream-splicer](https://npmjs.org/package/labeled-stream-splicer):
+
+* `'pack'` - [browser-pack](https://npmjs.org/package/browser-pack)
+* `'wrap'` - apply final wrapping
+
+You can call `pipeline.get` with a label name to get a handle on a stream pipeline that you can `push()`, `unshift()`, or `splice()` to insert your own transform streams.
+
+Event handlers must be attached *before* calling `b.plugin`.
+
 ## Work with [`watchify`] and [`gulp`]
 
 ```javascript
