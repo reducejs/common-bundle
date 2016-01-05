@@ -1,4 +1,12 @@
-<!-- 80a377b 1451545960000 -->
+<!-- b70575a 1451983476000 -->
+
+## [v0.1.5](https://github.com/zoubin/common-bundle/commit/b70575a) (2016-01-05)
+
+* [[`4f519d3`](https://github.com/zoubin/common-bundle/commit/4f519d3)] update readme
+
+* [[`b423852`](https://github.com/zoubin/common-bundle/commit/b423852)] emit sub pipelines
+
+* [[`e6b8c84`](https://github.com/zoubin/common-bundle/commit/e6b8c84)] CHANGELOG
 
 ## [v0.1.4](https://github.com/zoubin/common-bundle/commit/80a377b) (2015-12-31)
 
