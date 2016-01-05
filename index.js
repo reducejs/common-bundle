@@ -36,10 +36,13 @@ module.exports = function (b, opts) {
         var options = mix({}, packOpts, {
           to: bundleID,
         })
-        return splicer.obj([
+        var pipeline = splicer.obj([
           'pack', [ packer(options) ],
           'wrap', [],
         ])
+
+        b.emit('common.pipeline', bundleID, pipeline)
+        return pipeline
       },
     })
     vinylStream.pipe(thr.obj(function (file, _, cb) {
