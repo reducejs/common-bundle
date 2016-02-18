@@ -17,24 +17,24 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "devDependencies": {
-    "browserify": "^12.0.1",
+    "browserify": "^13.0.0",
     "callback-sequence": "^3.2.0",
     "concat-stream": "^1.5.1",
     "del": "^2.2.0",
-    "eslint": "^1.10.3",
+    "eslint": "^2.1.0",
     "glob": "^6.0.2",
     "tap": "^5.0.0",
     "vinyl-fs": "^2.2.1",
     "watchify": "^3.6.1"
   },
   "scripts": {
-    "test": "npm run lint && tap --cov test/*.js",
+    "test": "npm run lint && tap test/*.js",
     "lint": "eslint *.js 'lib/**/*.js' test/*.js bin/*.js",
-    "coveralls": "COVERALLS_REPO_TOKEN=fyEg54sM1OUyF62IYKJ8X3IfmQlDXzv39 npm test"
+    "coveralls": "COVERALLS_REPO_TOKEN=REPO_TOKEN tap --cov test/*.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoubin/common-bundle.git"
+    "url": "git+https://github.com/reducejs/common-bundle.git"
   },
   "keywords": [
     "browserify-plugin",
@@ -44,7 +44,7 @@
   "author": "zoubin",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zoubin/common-bundle/issues"
+    "url": "https://github.com/reducejs/common-bundle/issues"
   },
-  "homepage": "https://github.com/zoubin/common-bundle#readme"
+  "homepage": "https://github.com/reducejs/common-bundle#readme"
 }
