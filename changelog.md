@@ -1,42 +1,54 @@
-<!-- b70575a 1451983476000 -->
+<!-- 33073e5 1455783639000 -->
 
-## [v0.1.5](https://github.com/zoubin/common-bundle/commit/b70575a) (2016-01-05)
+* [[`33073e5`](https://github.com/reducejs/common-bundle/commit/33073e5)] deprecate 0.12
 
-* [[`4f519d3`](https://github.com/zoubin/common-bundle/commit/4f519d3)] update readme
+* [[`bec71e2`](https://github.com/reducejs/common-bundle/commit/bec71e2)] travis: kill 0.12
 
-* [[`b423852`](https://github.com/zoubin/common-bundle/commit/b423852)] emit sub pipelines
+## [v0.2.0](https://github.com/reducejs/common-bundle/commit/c5704b6) (2016-02-18)
 
-* [[`e6b8c84`](https://github.com/zoubin/common-bundle/commit/e6b8c84)] CHANGELOG
+* [[`6e45b4d`](https://github.com/reducejs/common-bundle/commit/6e45b4d)] new fork
 
-## [v0.1.4](https://github.com/zoubin/common-bundle/commit/80a377b) (2015-12-31)
+* [[`6e59975`](https://github.com/reducejs/common-bundle/commit/6e59975)] Update tap
 
-* [[`6bab154`](https://github.com/zoubin/common-bundle/commit/6bab154)] Fix vinylify: should consume groupStream correctly
+* [[`f917b06`](https://github.com/reducejs/common-bundle/commit/f917b06)] CHANGELOG
 
-## [v0.1.3](https://github.com/zoubin/common-bundle/commit/2b0956b) (2015-12-30)
+## [v0.1.5](https://github.com/reducejs/common-bundle/commit/b70575a) (2016-01-05)
 
-* [[`19eb458`](https://github.com/zoubin/common-bundle/commit/19eb458)] Pass bundleID to pack options. Update tap
+* [[`4f519d3`](https://github.com/reducejs/common-bundle/commit/4f519d3)] update readme
 
-## [v0.1.2](https://github.com/zoubin/common-bundle/commit/c28f20b) (2015-12-29)
+* [[`b423852`](https://github.com/reducejs/common-bundle/commit/b423852)] emit sub pipelines
 
-* [[`df67b9e`](https://github.com/zoubin/common-bundle/commit/df67b9e)] Sugar way to specify one common for all
+* [[`e6b8c84`](https://github.com/reducejs/common-bundle/commit/e6b8c84)] CHANGELOG
 
-## [v0.1.1](https://github.com/zoubin/common-bundle/commit/fedc6e5) (2015-12-29)
+## [v0.1.4](https://github.com/reducejs/common-bundle/commit/80a377b) (2015-12-31)
 
-* [[`00627fe`](https://github.com/zoubin/common-bundle/commit/00627fe)] Fix readme
+* [[`6bab154`](https://github.com/reducejs/common-bundle/commit/6bab154)] Fix vinylify: should consume groupStream correctly
 
-* [[`f8c9635`](https://github.com/zoubin/common-bundle/commit/f8c9635)] More examples
+## [v0.1.3](https://github.com/reducejs/common-bundle/commit/2b0956b) (2015-12-30)
 
-## [v0.1.0](https://github.com/zoubin/common-bundle/commit/a11ca01) (2015-12-28)
+* [[`19eb458`](https://github.com/reducejs/common-bundle/commit/19eb458)] Pass bundleID to pack options. Update tap
 
-* [[`e373fe3`](https://github.com/zoubin/common-bundle/commit/e373fe3)] Update package.json. Add badges
+## [v0.1.2](https://github.com/reducejs/common-bundle/commit/c28f20b) (2015-12-29)
 
-* [[`8a2e721`](https://github.com/zoubin/common-bundle/commit/8a2e721)] Add more tests. Respect eslint
+* [[`df67b9e`](https://github.com/reducejs/common-bundle/commit/df67b9e)] Sugar way to specify one common for all
 
-* [[`9bd9c78`](https://github.com/zoubin/common-bundle/commit/9bd9c78)] Readme. Rename options
+## [v0.1.1](https://github.com/reducejs/common-bundle/commit/fedc6e5) (2015-12-29)
 
-* [[`2c96825`](https://github.com/zoubin/common-bundle/commit/2c96825)] Add examples
+* [[`00627fe`](https://github.com/reducejs/common-bundle/commit/00627fe)] Fix readme
 
-* [[`f94fd2c`](https://github.com/zoubin/common-bundle/commit/f94fd2c)] Initial commit
+* [[`f8c9635`](https://github.com/reducejs/common-bundle/commit/f8c9635)] More examples
 
-* [[`13e6711`](https://github.com/zoubin/common-bundle/commit/13e6711)] common-bundle
+## [v0.1.0](https://github.com/reducejs/common-bundle/commit/a11ca01) (2015-12-28)
+
+* [[`e373fe3`](https://github.com/reducejs/common-bundle/commit/e373fe3)] Update package.json. Add badges
+
+* [[`8a2e721`](https://github.com/reducejs/common-bundle/commit/8a2e721)] Add more tests. Respect eslint
+
+* [[`9bd9c78`](https://github.com/reducejs/common-bundle/commit/9bd9c78)] Readme. Rename options
+
+* [[`2c96825`](https://github.com/reducejs/common-bundle/commit/2c96825)] Add examples
+
+* [[`f94fd2c`](https://github.com/reducejs/common-bundle/commit/f94fd2c)] Initial commit
+
+* [[`13e6711`](https://github.com/reducejs/common-bundle/commit/13e6711)] common-bundle
 
