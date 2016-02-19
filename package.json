@@ -22,15 +22,16 @@
     "concat-stream": "^1.5.1",
     "del": "^2.2.0",
     "eslint": "^2.1.0",
-    "glob": "^6.0.2",
+    "glob": "^7.0.0",
     "tap": "^5.0.0",
     "vinyl-fs": "^2.2.1",
     "watchify": "^3.6.1"
   },
   "scripts": {
     "test": "npm run lint && tap test/*.js",
+    "cov": "tap --cov test/*.js",
     "lint": "eslint *.js 'lib/**/*.js' test/*.js bin/*.js",
-    "coveralls": "COVERALLS_REPO_TOKEN=REPO_TOKEN tap --cov test/*.js"
+    "coveralls": "COVERALLS_REPO_TOKEN=3c49VUdFjbiNIAmdZKh4gwOIlq8wklLAV npm run cov"
   },
   "engines": {
     "node": ">=4.2.1"
