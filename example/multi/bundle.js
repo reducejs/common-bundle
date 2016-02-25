@@ -14,8 +14,8 @@ const b = browserify(entries, {
 })
 const build = path.resolve(__dirname, 'build')
 
-b.plugin(require('..'), {
-  groups: '**/page/**/index.js',
+b.plugin(require('../..'), {
+  groups: 'page/**/index.js',
   common: [
     {
       output: 'common-red-and-green.js',

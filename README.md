@@ -13,6 +13,9 @@ A [`browserify`] plugin for packing modules into common shared bundles.
 * Group one or more entries (modules) together to create a bundle.
 * Extract common modules from bundles to create additional shared bundles.
 * `b.bundle()` generates a stream flowing [`vinyl`] file objects.
+* Work together with [`watchify2`] to re-bundle
+  when entries are added and removed in the watching mode.
+  See [example](example/multi/watch.js).
 
 ## Example
 
@@ -33,7 +36,7 @@ var b = browserify(entries, { basedir: basedir })
 b.plugin('common-bundle', {
   // Each index.js packed into a new bundle
   // with path page/**/index.js
-  groups: '**/page/**/index.js',
+  groups: 'page/**/index.js',
 })
  
 var vfs = require('vinyl-fs')
@@ -58,7 +61,7 @@ var b = browserify(entries, { basedir: basedir })
  
 b.plugin('common-bundle', {
   // Each index.js packed into a new bundle with path page/**/index.js
-  groups: '**/page/**/index.js',
+  groups: 'page/**/index.js',
 
   common: {
     output: 'common.js',
@@ -96,7 +99,7 @@ var b = browserify(entries, { basedir: basedir })
  
 b.plugin('common-bundle', {
   // Each index.js packed into a new bundle with path page/**/index.js
-  groups: '**/page/**/index.js',
+  groups: 'page/**/index.js',
 
   common: [
     {
@@ -167,15 +170,15 @@ Or:
 ```javascript
 [
   {
-    filter: '**/A/index.js',
+    filter: 'A/index.js',
     output: 'A.js',
   },
   {
-    filter: '**/B/index.js',
+    filter: 'B/index.js',
     output: 'B.js',
   },
   {
-    filter: '**/C/index.js',
+    filter: 'C/index.js',
     output: 'C.js',
   },
 ]
@@ -213,7 +216,7 @@ Type: `Function`
 
 Receives the file path to a module.
 
-If `true` returned, that module will be packed into this bundle.
+If `true` returned, that module will be packed into this new bundle.
 
 Type: `String`, `Array`
 
@@ -224,6 +227,8 @@ This options is used to create bundles for sharing
 among those created through the [`groups`](#groups) option.
 
 Type: `Array`
+
+**NOTE**: if there is only one single original bundle, this option is ignored.
 
 Examples:
 
@@ -267,7 +272,7 @@ Specify which bundles to share the new bundle.
 
 Type: `Function`
 
-Receives an array of bundle file paths,
+Receives an array of bundle file paths (relative to [`basedir`](#basedir)),
 and should return those to share the new bundle.
 
 Type: `String`, `Array`
@@ -334,6 +339,7 @@ gulp.task('watch', function () {
 [`factor-bundle`]: https://github.com/substack/factor-bundle
 [`vinyl`]: https://github.com/gulpjs/vinyl
 [`watchify`]: https://github.com/substack/watchify
+[`watchify2`]: https://github.com/reducejs/watchify2
 [`gulp`]: https://github.com/gulpjs/gulp
 [`multimatch`]: https://github.com/sindresorhus/multimatch
 
