@@ -20,7 +20,7 @@ test('multiple', function(t) {
     function () {
       return browserify(['./a.js', './b.js'], { basedir: fixtures('src') })
         .plugin(commonify, {
-          groups: ['**/a.js', '**/b.js'],
+          groups: ['a.js', 'b.js'],
           common: {
             filter: ['a.js', 'b.js'],
             output: 'common.js',

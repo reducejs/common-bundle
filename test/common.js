@@ -6,7 +6,7 @@ const util = require('../lib/util')
 
 function toMap(o) {
   let ret = new Map()
-  for(let k in o) {
+  for (let k in o) {
     ret.set(k, new Set(o[k]))
   }
   return ret

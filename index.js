@@ -24,7 +24,7 @@ module.exports = function (b, opts) {
     next(null, row)
   }
 
-  function end(next) {
+  function end(done) {
     let noop = function () {}
     let output = through.obj(noop, noop)
 
@@ -33,9 +33,7 @@ module.exports = function (b, opts) {
       groupFilter: groups,
       common: opts.common,
       pack: function (bundleID) {
-        let options = Object.assign({}, packOpts, {
-          to: bundleID,
-        })
+        let options = Object.assign({}, packOpts, { to: bundleID })
         let pipeline = splicer.obj([
           'pack', [ packer(options) ],
           'wrap', [],
@@ -46,23 +44,23 @@ module.exports = function (b, opts) {
       },
     })
     vinylStream.pipe(
-      through.obj(function (file, _, cb) {
-        b.emit('log', 'New bundle: ' + file.relative)
+      through.obj(function (file, _, next) {
+        b.emit('log', 'bundle: ' + file.relative)
         output.push(file)
-        cb()
-      }, function (cb) {
+        next()
+      }, function (next) {
         output.push(null)
-        cb()
+        next()
       })
     )
 
     b.pipeline.get('pack').unshift(
-      through.obj(function (row, _, cb) {
+      through.obj(function (row, _, next) {
         vinylStream.write(row)
-        cb()
-      }, function (cb) {
+        next()
+      }, function (next) {
         vinylStream.end()
-        cb()
+        next()
       })
     )
     b.pipeline.push(output)
@@ -71,7 +69,7 @@ module.exports = function (b, opts) {
       groups = []
     }
 
-    next()
+    done()
   }
 
   function hookPipeline() {
