@@ -1,12 +1,12 @@
-var thr = require('through2')
-var test = require('tap').test
-var reverse = require('reversepoint')
-var splicer = require('labeled-stream-splicer')
-var concat = require('concat-stream')
+'use strict'
 
-var createStream = require('../lib/vinylify')
-
-var ROWS = [
+const through = require('../lib/through')
+const test = require('tap').test
+const reverse = require('reversepoint')
+const splicer = require('labeled-stream-splicer')
+const concat = require('concat-stream')
+const createStream = require('../lib/vinylify')
+const ROWS = [
   {
     file: '/path/to/src/page/A/index.css',
     id: '/path/to/src/page/A/index.css',
@@ -121,7 +121,7 @@ function packCss() {
 }
 
 function packer() {
-  return thr.obj(function (row, _, next) {
+  return through.obj(function (row, _, next) {
     next(null, row.source)
   })
 }

@@ -4,7 +4,7 @@
 [![coverage](https://img.shields.io/coveralls/reducejs/common-bundle.svg)](https://coveralls.io/github/reducejs/common-bundle)
 [![dependencies](https://david-dm.org/reducejs/common-bundle.svg)](https://david-dm.org/reducejs/common-bundle)
 [![devDependencies](https://david-dm.org/reducejs/common-bundle/dev-status.svg)](https://david-dm.org/reducejs/common-bundle#info=devDependencies)
-[![node](https://img.shields.io/node/v/common-bundle.svg)](https://www.npmjs.org/package/common-bundle)
+![node](https://img.shields.io/node/v/common-bundle.svg)
 
 A [`browserify`] plugin for packing modules into common shared bundles.
 
@@ -135,8 +135,8 @@ b.plugin('common-bundle', options)
 
 #### groups
 This options is used to create original bundles,
-which will can be used to generate additional shared modules
-later through the [`common`](#common) option.
+which will be used to generate additional shared bundles
+later according to the [`common`](#common) option.
 
 Specify which modules (and all of their dependencies)
 to be packed together into which bundle.

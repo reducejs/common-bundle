@@ -9,11 +9,9 @@
     "duplexer2": "^0.1.4",
     "labeled-stream-splicer": "^2.0.0",
     "merge-stream": "^1.0.0",
-    "mixy": "^1.0.0",
     "multimatch": "^2.1.0",
     "reversepoint": "^0.2.1",
     "stream-combiner2": "^1.1.1",
-    "through2": "^2.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
   "devDependencies": {

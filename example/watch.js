@@ -1,14 +1,14 @@
-var browserify = require('browserify')
-var vfs = require('vinyl-fs')
-var del = require('del')
-var glob = require('glob')
-var path = require('path')
-var thr = require('through2')
+'use strict'
 
-var basedir = path.resolve(__dirname, 'src')
-var entries = glob.sync('page/**/index.js', { cwd: basedir })
-
-var b = browserify(entries, {
+const browserify = require('browserify')
+const vfs = require('vinyl-fs')
+const del = require('del')
+const glob = require('glob')
+const path = require('path')
+const stream = require('stream')
+const basedir = path.resolve(__dirname, 'src')
+const entries = glob.sync('page/**/index.js', { cwd: basedir })
+const b = browserify(entries, {
   basedir: basedir,
   cache: {},
   packageCache: {},
@@ -32,13 +32,18 @@ b.plugin(require('..'), {
 b.plugin('watchify')
 
 function bundle() {
-  var build = path.resolve(__dirname, 'build')
+  let build = path.resolve(__dirname, 'build')
   del.sync(build)
   b.bundle()
-    .pipe(thr.obj(function (file, _, next) {
-      b.emit('log', 'Creating bundle: ' + file.relative)
-      next(null, file)
-    }))
+    .pipe(
+      stream.Transform({
+        objectMode: true,
+        transform: function (file, _, next) {
+          b.emit('log', 'Creating bundle: ' + file.relative)
+          next(null, file)
+        },
+      })
+    )
     .pipe(vfs.dest(build))
 }
 
