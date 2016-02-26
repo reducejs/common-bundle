@@ -1,5 +1,6 @@
 'use strict'
 
+const path = require('path')
 const through = require('./lib/through')
 const pack = require('browser-pack')
 const splicer = require('labeled-stream-splicer')
@@ -58,7 +59,7 @@ module.exports = function (b, opts) {
     vinylStream.on('output', function (id, file) {
       map[id] = map[id] || {}
       map[id].modules = map[id].modules || []
-      map[id].modules.push(file)
+      map[id].modules.push(path.relative(basedir, file))
     })
     vinylStream.once('common', function (bundle2common) {
       bundle2common.forEach(function (commons, id) {

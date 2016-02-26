@@ -22,15 +22,15 @@ test('map', function(t) {
     b.on('common.map', function (map) {
       t.same(map, {
         'a.js': {
-          modules: [fixtures('src', 'a.js')],
+          modules: ['a.js'],
           deps: ['common.js'],
         },
         'b.js': {
-          modules: [fixtures('src', 'b.js')],
+          modules: ['b.js'],
           deps: ['common.js'],
         },
         'common.js': {
-          modules: [fixtures('src', 'c.js')],
+          modules: ['c.js'],
         },
       })
 
