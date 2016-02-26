@@ -34,7 +34,9 @@ module.exports = function (b, opts) {
       groupFilter: groups,
       common: opts.common,
       pack: function (bundleID) {
-        let options = Object.assign({}, packOpts, { to: bundleID })
+        let options = Object.assign(
+          {}, packOpts, { to: path.resolve(basedir, bundleID) }
+        )
         let pipeline = splicer.obj([
           'pack', [ packer(options) ],
           'wrap', [],
