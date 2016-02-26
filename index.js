@@ -54,6 +54,26 @@ module.exports = function (b, opts) {
       })
     )
 
+    let map = {}
+    vinylStream.on('output', function (id, file) {
+      map[id] = map[id] || {}
+      map[id].modules = map[id].modules || []
+      map[id].modules.push(file)
+    })
+    vinylStream.once('common', function (bundle2common) {
+      bundle2common.forEach(function (commons, id) {
+        map[id] = map[id] || {}
+        map[id].deps = []
+        for (let i of commons) {
+          map[id].deps.push(i)
+        }
+      })
+    })
+
+    vinylStream.once('end', function () {
+      b.emit('common.map', map)
+    })
+
     b.pipeline.get('pack').unshift(
       through.obj(function (row, _, next) {
         vinylStream.write(row)

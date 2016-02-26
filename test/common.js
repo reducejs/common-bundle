@@ -45,8 +45,17 @@ const originalGroupsMap = toMap({
 })
 
 test('one common for all', function(t) {
+  let ret = common(originalGroupsMap, 'common.js')
   t.same(
-    toObj(common(originalGroupsMap, 'common.js')),
+    toObj(ret.bundle2common),
+    {
+      'page/A/index.js': [ 'common.js' ],
+      'page/B/index.js': [ 'common.js' ],
+      'page/C/index.js': [ 'common.js' ],
+    }
+  )
+  t.same(
+    toObj(ret.bundle2module),
     {
       'page/A/index.js': [
         '/path/to/src/page/A/index.js',
@@ -76,25 +85,34 @@ test('one common for all', function(t) {
 })
 
 test('one common for each group', function(t) {
+  let ret = common(originalGroupsMap, [
+    {
+      output: 'ab.js',
+      filter: ['page/A/index.js', 'page/B/index.js'],
+    },
+    {
+      output: 'bc.js',
+      filter: ['page/C/index.js', 'page/B/index.js'],
+    },
+    {
+      output: 'ac.js',
+      filter: ['page/A/index.js', 'page/C/index.js'],
+    },
+    {
+      output: 'common.js',
+      filter: '**/*.js',
+    },
+  ])
   t.same(
-    toObj(common(originalGroupsMap, [
-      {
-        output: 'ab.js',
-        filter: ['page/A/index.js', 'page/B/index.js'],
-      },
-      {
-        output: 'bc.js',
-        filter: ['page/C/index.js', 'page/B/index.js'],
-      },
-      {
-        output: 'ac.js',
-        filter: ['page/A/index.js', 'page/C/index.js'],
-      },
-      {
-        output: 'common.js',
-        filter: '**/*.js',
-      },
-    ])),
+    toObj(ret.bundle2common),
+    {
+      'page/A/index.js': [ 'ab.js', 'ac.js', 'common.js' ],
+      'page/B/index.js': [ 'ab.js', 'bc.js', 'common.js' ],
+      'page/C/index.js': [ 'bc.js', 'ac.js', 'common.js' ],
+    }
+  )
+  t.same(
+    toObj(ret.bundle2module),
     {
       'page/A/index.js': [
         '/path/to/src/page/A/index.js',
@@ -130,13 +148,22 @@ test('one common for each group', function(t) {
 })
 
 test('common function', function(t) {
+  let ret = common(originalGroupsMap, {
+    output: 'common.js',
+    filter: function (groups) {
+      return groups
+    },
+  })
   t.same(
-    toObj(common(originalGroupsMap, {
-      output: 'common.js',
-      filter: function (groups) {
-        return groups
-      },
-    })),
+    toObj(ret.bundle2common),
+    {
+      'page/A/index.js': [ 'common.js' ],
+      'page/B/index.js': [ 'common.js' ],
+      'page/C/index.js': [ 'common.js' ],
+    }
+  )
+  t.same(
+    toObj(ret.bundle2module),
     {
       'page/A/index.js': [
         '/path/to/src/page/A/index.js',

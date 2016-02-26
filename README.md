@@ -289,7 +289,16 @@ Type: `String`
 
 ### Events
 
-#### b.on('common.pipeline', function (id, pipeline) {})
+#### b.on('common.map', map => {})
+**map**
+
+You can use `Object.keys(map)` to get paths (`file.relative`) to all bundles.
+
+In addition, `map[bundle]` is an object with the following fields:
+* `modules`: `Array`. Absolute paths to modules packed into `bundle`
+* `deps`: `Array`. Relative paths to (common) bundles that `bundle` is dependent upon.
+
+#### b.on('common.pipeline', (id, pipeline) => {})
 
 Every time a bundle created, a `common.pipeline` event is emitted with its `id` and the packing `pipeline`.
 
