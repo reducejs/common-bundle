@@ -296,7 +296,7 @@ You can use `Object.keys(map)` to get paths (`file.relative`) to all bundles.
 
 In addition, `map[bundle]` is an object with the following fields:
 * `modules`: `Array`. Paths to modules (relative to `basedir`) packed into `bundle`
-* `deps`: `Array`. Relative paths to (common) bundles that `bundle` is dependent upon.
+* `deps`: `Array`. Paths to common bundles (`file.relative`) that `bundle` depends upon.
 
 #### b.on('common.pipeline', (id, pipeline) => {})
 
