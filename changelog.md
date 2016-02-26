@@ -1,4 +1,26 @@
-<!-- 33073e5 1455783639000 -->
+<!-- 6078001 1456458244000 -->
+
+## [v0.3.0](https://github.com/reducejs/common-bundle/commit/6078001) (2016-02-26)
+
+* [[`d113715`](https://github.com/reducejs/common-bundle/commit/d113715)] Readme: typo
+
+* [[`c912fb5`](https://github.com/reducejs/common-bundle/commit/c912fb5)] Fix: common.map, map.modules should contain module file path relative to basedir
+
+* [[`8f532ed`](https://github.com/reducejs/common-bundle/commit/8f532ed)] Feature: possible to listen for common.map
+
+* [[`2ed4671`](https://github.com/reducejs/common-bundle/commit/2ed4671)] Feature: no common bundle when there is only one single original one
+
+* [[`e34cd09`](https://github.com/reducejs/common-bundle/commit/e34cd09)] Feature: opts.groups support relative globs
+
+* [[`5496afa`](https://github.com/reducejs/common-bundle/commit/5496afa)] Fix: path problem when opts.groups is function
+
+* [[`7986fd9`](https://github.com/reducejs/common-bundle/commit/7986fd9)] Refactor: use ES6 syntax
+
+* [[`29468c0`](https://github.com/reducejs/common-bundle/commit/29468c0)] package.json: coveralls
+
+## [v0.2.1](https://github.com/reducejs/common-bundle/commit/54e55c8) (2016-02-18)
+
+* [[`9176553`](https://github.com/reducejs/common-bundle/commit/9176553)] changelog
 
 * [[`33073e5`](https://github.com/reducejs/common-bundle/commit/33073e5)] deprecate 0.12
 
