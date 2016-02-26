@@ -1,14 +1,16 @@
-var test = require('tap').test
-var browserify = require('browserify')
-var vfs = require('vinyl-fs')
-var del = require('del')
-var run = require('callback-sequence').run
-var commonify = require('..')
+'use strict'
 
-var path = require('path')
-var fixtures = path.resolve.bind(path, __dirname, 'fixtures')
-var build = fixtures('build')
-var fs = require('fs')
+const fs = require('fs')
+const del = require('del')
+const path = require('path')
+const commonify = require('..')
+const vfs = require('vinyl-fs')
+const test = require('tap').test
+const browserify = require('browserify')
+const run = require('callback-sequence').run
+
+const fixtures = path.resolve.bind(path, __dirname, 'fixtures')
+const build = fixtures('build')
 
 test('multiple', function(t) {
   return run([
@@ -18,7 +20,7 @@ test('multiple', function(t) {
     function () {
       return browserify(['./a.js', './b.js'], { basedir: fixtures('src') })
         .plugin(commonify, {
-          groups: ['**/a.js', '**/b.js'],
+          groups: ['a.js', 'b.js'],
           common: {
             filter: ['a.js', 'b.js'],
             output: 'common.js',

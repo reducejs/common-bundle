@@ -1,14 +1,15 @@
-var test = require('tap').test
-var browserify = require('browserify')
-var vfs = require('vinyl-fs')
-var del = require('del')
-var run = require('callback-sequence').run
-var commonify = require('..')
+'use strict'
 
-var path = require('path')
-var fixtures = path.resolve.bind(path, __dirname, 'fixtures')
-var build = fixtures('build')
-var fs = require('fs')
+const test = require('tap').test
+const browserify = require('browserify')
+const vfs = require('vinyl-fs')
+const del = require('del')
+const run = require('callback-sequence').run
+const commonify = require('..')
+const path = require('path')
+const fixtures = path.resolve.bind(path, __dirname, 'fixtures')
+const build = fixtures('build')
+const fs = require('fs')
 
 test('needRecords', function(t) {
   return run([

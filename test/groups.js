@@ -1,24 +1,26 @@
-var test = require('tap').test
-var Groups = require('../lib/groups')
-var thr = require('through2')
+'use strict'
+
+const test = require('tap').test
+const Groups = require('../lib/groups')
+const through = require('../lib/through')
 
 test('groupFilter.entries', function(tt) {
   function run(filter, t) {
-    var groups = new Groups({
+    let groups = new Groups({
       basedir: '/path/to/src',
       groupFilter: filter,
     })
     groups.once('groups', function (groupsMap) {
-      t.same(Object.keys(groupsMap).length, 2)
+      t.same(groupsMap.size, 2)
       t.same(
-        groupsMap['page/A/index.js'].sort(),
+        sort(groupsMap.get('page/A/index.js')),
         [
           '/path/to/node_modules/C/index.js',
           '/path/to/src/page/A/index.js',
         ]
       )
       t.same(
-        groupsMap['page/B/index.js'].sort(),
+        sort(groupsMap.get('page/B/index.js')),
         [
           '/path/to/node_modules/C/index.js',
           '/path/to/src/page/B/index.js',
@@ -57,28 +59,28 @@ test('groupFilter.entries', function(tt) {
 
 test('groupFilter.output', function(tt) {
   function run(filter, t) {
-    var groups = new Groups({
+    let groups = new Groups({
       basedir: '/path/to/src',
       groupFilter: filter,
     })
     groups.once('groups', function (groupsMap) {
-      t.same(Object.keys(groupsMap).length, 3)
+      t.same(groupsMap.size, 3)
       t.same(
-        groupsMap['A.js'].sort(),
+        sort(groupsMap.get('A.js')),
         [
           '/path/to/node_modules/C/index.js',
           '/path/to/src/page/A/index.js',
         ]
       )
       t.same(
-        groupsMap['B.js'].sort(),
+        sort(groupsMap.get('B.js')),
         [
           '/path/to/node_modules/C/index.js',
           '/path/to/src/page/B/index.js',
         ]
       )
       t.same(
-        groupsMap['C.js'],
+        sort(groupsMap.get('C.js')),
         ['/path/to/node_modules/C/index.js']
       )
       t.end()
@@ -117,7 +119,7 @@ test('groupFilter.output', function(tt) {
 })
 
 test('groupFilter.one2multiple', function(t) {
-  var groupsStream = new Groups({
+  let groupsStream = new Groups({
     basedir: '/path/to/src',
     groupFilter: [
       '**/page/**/index.js',
@@ -131,24 +133,24 @@ test('groupFilter.one2multiple', function(t) {
       },
     ],
   })
-  groupsStream.once('groups', function (groups) {
-    t.same(Object.keys(groups).length, 3)
+  groupsStream.once('groups', function (groupsMap) {
+    t.same(groupsMap.size, 3)
     t.same(
-      groups['page/A/index.js'].sort(),
+      sort(groupsMap.get('page/A/index.js')),
       [
         '/path/to/node_modules/C/index.js',
         '/path/to/src/page/A/index.js',
       ]
     )
     t.same(
-      groups['page/B/index.js'].sort(),
+      sort(groupsMap.get('page/B/index.js')),
       [
         '/path/to/node_modules/C/index.js',
         '/path/to/src/page/B/index.js',
       ]
     )
     t.same(
-      groups['bundle.js'].sort(),
+      sort(groupsMap.get('bundle.js')),
       [
         '/path/to/node_modules/C/index.js',
         '/path/to/src/page/A/index.js', '/path/to/src/page/B/index.js',
@@ -160,7 +162,7 @@ test('groupFilter.one2multiple', function(t) {
 })
 
 test('stray modules', function(t) {
-  var groupsStream = new Groups({
+  let groupsStream = new Groups({
     basedir: '/path/to/src',
     groupFilter: [
       {
@@ -171,10 +173,10 @@ test('stray modules', function(t) {
       },
     ],
   })
-  groupsStream.once('groups', function (groups) {
-    t.same(Object.keys(groups).length, 2)
+  groupsStream.once('groups', function (groupsMap) {
+    t.same(groupsMap.size, 2)
     t.same(
-      groups['page/A/index.js'].sort(),
+      sort(groupsMap.get('page/A/index.js')),
       [
         '/path/to/node_modules/C/index.js',
         '/path/to/node_modules/E/index.js',
@@ -183,7 +185,7 @@ test('stray modules', function(t) {
       ]
     )
     t.same(
-      groups['page/B/index.js'].sort(),
+      sort(groupsMap.get('page/B/index.js')),
       [
         '/path/to/node_modules/C/index.js',
         '/path/to/node_modules/E/index.js',
@@ -204,16 +206,13 @@ test('stray modules', function(t) {
     id: '/path/to/node_modules/E/index.js',
     file: '/path/to/node_modules/E/index.js',
   })
-  source().on('data', function (row) {
-    groupsStream.write(row)
-  })
-  .on('end', function () {
-    groupsStream.end()
-  })
+  source()
+    .on('data', row => groupsStream.write(row))
+    .on('end', () => groupsStream.end())
 })
 
 function source() {
-  var ret = thr.obj()
+  let ret = through.obj()
   ret.write({
     id: '/path/to/src/page/A/index.js',
     file: '/path/to/src/page/A/index.js',
@@ -234,5 +233,11 @@ function source() {
   })
   ret.end()
   return ret
+}
+
+function sort(set) {
+  let arr = []
+  set.forEach(v => arr.push(v))
+  return arr.sort()
 }
 
