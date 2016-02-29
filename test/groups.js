@@ -64,7 +64,7 @@ test('groupFilter.output', function(tt) {
       groupFilter: filter,
     })
     groups.once('groups', function (groupsMap) {
-      t.same(groupsMap.size, 3)
+      t.same(groupsMap.size, 2)
       t.same(
         sort(groupsMap.get('A.js')),
         [
@@ -79,10 +79,6 @@ test('groupFilter.output', function(tt) {
           '/path/to/src/page/B/index.js',
         ]
       )
-      t.same(
-        sort(groupsMap.get('C.js')),
-        ['/path/to/node_modules/C/index.js']
-      )
       t.end()
     })
     source().pipe(groups)
@@ -95,9 +91,6 @@ test('groupFilter.output', function(tt) {
     if (/B/.test(file)) {
       return 'B.js'
     }
-    if (/C/.test(file)) {
-      return 'C.js'
-    }
   }))
 
   tt.test('string', run.bind(null, [
@@ -108,10 +101,6 @@ test('groupFilter.output', function(tt) {
     {
       filter: '**/B/index.js',
       output: 'B.js',
-    },
-    {
-      filter: '**/C/index.js',
-      output: 'C.js',
     },
   ]))
 
