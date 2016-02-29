@@ -1,4 +1,14 @@
-<!-- 6078001 1456458244000 -->
+<!-- eb76449 1456737405000 -->
+
+## [v0.3.2](https://github.com/reducejs/common-bundle/commit/eb76449) (2016-02-29)
+
+* [[`6c32f75`](https://github.com/reducejs/common-bundle/commit/6c32f75)] Fix: opts.groups.output return undefined
+
+## [v0.3.1](https://github.com/reducejs/common-bundle/commit/c30dd73) (2016-02-26)
+
+* [[`cb4c414`](https://github.com/reducejs/common-bundle/commit/cb4c414)] Fix: pass the full path to opts.pack
+
+* [[`551d936`](https://github.com/reducejs/common-bundle/commit/551d936)] changelog
 
 ## [v0.3.0](https://github.com/reducejs/common-bundle/commit/6078001) (2016-02-26)
 
