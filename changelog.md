@@ -1,4 +1,10 @@
-<!-- eb76449 1456737405000 -->
+<!-- 44a15a1 1456908550000 -->
+
+## [v0.3.3](https://github.com/reducejs/common-bundle/commit/44a15a1) (2016-03-02)
+
+* [[`67ccfaa`](https://github.com/reducejs/common-bundle/commit/67ccfaa)] Remove useless log events
+
+* [[`45303bd`](https://github.com/reducejs/common-bundle/commit/45303bd)] changelog
 
 ## [v0.3.2](https://github.com/reducejs/common-bundle/commit/eb76449) (2016-02-29)
 
