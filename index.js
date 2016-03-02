@@ -46,16 +46,6 @@ module.exports = function (b, opts) {
         return pipeline
       },
     })
-    vinylStream.pipe(
-      through.obj(function (file, _, next) {
-        b.emit('log', 'bundle: ' + file.relative)
-        output.push(file)
-        next()
-      }, function (next) {
-        output.push(null)
-        next()
-      })
-    )
 
     let map = {}
     vinylStream.on('output', function (id, file) {
@@ -73,7 +63,9 @@ module.exports = function (b, opts) {
       })
     })
 
+    vinylStream.on('data', file => output.push(file))
     vinylStream.once('end', function () {
+      output.push(null)
       b.emit('common.map', map)
     })
 
