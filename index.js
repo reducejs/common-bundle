@@ -9,35 +9,33 @@ const vinylify = require('./lib/vinylify')
 module.exports = function (b, opts) {
   opts = opts || {}
 
-  let basedir = opts.basedir || b._options.basedir || process.cwd()
-  let needRecords = !opts.groups
-  let packOpts = Object.assign({}, b._options, {
+  var basedir = opts.basedir || b._options.basedir || process.cwd()
+  var packOpts = Object.assign({}, b._options, {
     raw: true,
     hasExports: true,
   })
-  let packer = opts.pack || pack
-  let groups = opts.groups || []
+  var packer = opts.pack || pack
+  var input = []
 
   function write(row, _, next) {
-    if (row.file && needRecords) {
-      groups.push(row.file)
+    if (row.file) {
+      input.push(row.file)
     }
     next(null, row)
   }
 
   function end(done) {
-    let noop = function () {}
-    let output = through.obj(noop, noop)
-
-    let vinylStream = vinylify({
+    var noop = function () {}
+    var output = through.obj(noop, noop)
+    var vinylStream = vinylify({
       basedir: basedir,
-      groupFilter: groups,
+      groupFilter: opts.groups || input,
       common: opts.common,
       pack: function (bundleID) {
-        let options = Object.assign(
+        var options = Object.assign(
           {}, packOpts, { to: path.resolve(basedir, bundleID) }
         )
-        let pipeline = splicer.obj([
+        var pipeline = splicer.obj([
           'pack', [ packer(options) ],
           'wrap', [],
         ])
@@ -47,7 +45,7 @@ module.exports = function (b, opts) {
       },
     })
 
-    let map = {}
+    var map = {}
     vinylStream.on('output', function (id, file) {
       map[id] = map[id] || {}
       map[id].modules = map[id].modules || []
@@ -80,22 +78,15 @@ module.exports = function (b, opts) {
     )
     b.pipeline.push(output)
 
-    if (needRecords) {
-      groups = []
-    }
-
     done()
   }
 
-  function hookPipeline() {
-    b.pipeline.get('record').push(
-      through.obj(write, end)
-    )
+  function hook() {
+    input = []
+    b.pipeline.get('record').push(through.obj(write, end))
   }
 
-  b.on('reset', hookPipeline)
-  hookPipeline()
-
-  return b
+  b.on('reset', hook)
+  hook()
 }
 
