@@ -10,22 +10,21 @@ test('groupFilter.entries', function(tt) {
       basedir: '/path/to/src',
       groupFilter: filter,
     })
-    groups.once('groups', function (groupsMap) {
-      t.same(groupsMap.size, 2)
-      t.same(
-        sort(groupsMap.get('page/A/index.js')),
-        [
-          '/path/to/node_modules/C/index.js',
-          '/path/to/src/page/A/index.js',
-        ]
-      )
-      t.same(
-        sort(groupsMap.get('page/B/index.js')),
-        [
-          '/path/to/node_modules/C/index.js',
-          '/path/to/src/page/B/index.js',
-        ]
-      )
+    groups.once('map', function (bundleMap) {
+      t.same(sort(bundleMap), {
+        'page/A/index.js': {
+          modules: [
+            '/path/to/node_modules/C/index.js',
+            '/path/to/src/page/A/index.js',
+          ],
+        },
+        'page/B/index.js': {
+          modules: [
+            '/path/to/node_modules/C/index.js',
+            '/path/to/src/page/B/index.js',
+          ],
+        },
+      })
       t.end()
     })
     source().pipe(groups)
@@ -38,7 +37,7 @@ test('groupFilter.entries', function(tt) {
   ))
 
   tt.test('object, pattern', run.bind(null, {
-    filter: '**/page/**/index.js',
+    filter: 'page/**/index.js',
   }))
 
   tt.test('object, array of patterns', run.bind(null, {
@@ -46,12 +45,12 @@ test('groupFilter.entries', function(tt) {
   }))
 
   tt.test('multiple', run.bind(
-    null, ['**/page/A/*.js', '**/page/B/*.js']
+    null, ['page/A/*.js', 'page/B/*.js']
   ))
 
   tt.test('object, multiple', run.bind(null, [
-    { filter: '**/page/A/*.js' },
-    { filter: '**/page/B/*.js' },
+    { filter: 'page/A/*.js' },
+    { filter: 'page/B/*.js' },
   ]))
 
   tt.end()
@@ -63,22 +62,21 @@ test('groupFilter.output', function(tt) {
       basedir: '/path/to/src',
       groupFilter: filter,
     })
-    groups.once('groups', function (groupsMap) {
-      t.same(groupsMap.size, 2)
-      t.same(
-        sort(groupsMap.get('A.js')),
-        [
-          '/path/to/node_modules/C/index.js',
-          '/path/to/src/page/A/index.js',
-        ]
-      )
-      t.same(
-        sort(groupsMap.get('B.js')),
-        [
-          '/path/to/node_modules/C/index.js',
-          '/path/to/src/page/B/index.js',
-        ]
-      )
+    groups.once('map', function (bundleMap) {
+      t.same(sort(bundleMap), {
+        'A.js': {
+          modules: [
+            '/path/to/node_modules/C/index.js',
+            '/path/to/src/page/A/index.js',
+          ],
+        },
+        'B.js': {
+          modules: [
+            '/path/to/node_modules/C/index.js',
+            '/path/to/src/page/B/index.js',
+          ],
+        },
+      })
       t.end()
     })
     source().pipe(groups)
@@ -95,11 +93,11 @@ test('groupFilter.output', function(tt) {
 
   tt.test('string', run.bind(null, [
     {
-      filter: '**/A/index.js',
+      filter: 'page/A/index.js',
       output: 'A.js',
     },
     {
-      filter: '**/B/index.js',
+      filter: 'page/B/index.js',
       output: 'B.js',
     },
   ]))
@@ -111,40 +109,39 @@ test('groupFilter.one2multiple', function(t) {
   let groupsStream = new Groups({
     basedir: '/path/to/src',
     groupFilter: [
-      '**/page/**/index.js',
+      'page/**/index.js',
       {
-        filter: '**/page/A/index.js',
+        filter: 'page/A/index.js',
         output: 'bundle.js',
       },
       {
-        filter: '**/page/B/index.js',
+        filter: 'page/B/index.js',
         output: 'bundle.js',
       },
     ],
   })
-  groupsStream.once('groups', function (groupsMap) {
-    t.same(groupsMap.size, 3)
-    t.same(
-      sort(groupsMap.get('page/A/index.js')),
-      [
-        '/path/to/node_modules/C/index.js',
-        '/path/to/src/page/A/index.js',
-      ]
-    )
-    t.same(
-      sort(groupsMap.get('page/B/index.js')),
-      [
-        '/path/to/node_modules/C/index.js',
-        '/path/to/src/page/B/index.js',
-      ]
-    )
-    t.same(
-      sort(groupsMap.get('bundle.js')),
-      [
-        '/path/to/node_modules/C/index.js',
-        '/path/to/src/page/A/index.js', '/path/to/src/page/B/index.js',
-      ]
-    )
+  groupsStream.once('map', function (bundleMap) {
+    t.same(sort(bundleMap), {
+      'page/A/index.js': {
+        modules: [
+          '/path/to/node_modules/C/index.js',
+          '/path/to/src/page/A/index.js',
+        ],
+      },
+      'page/B/index.js': {
+        modules: [
+          '/path/to/node_modules/C/index.js',
+          '/path/to/src/page/B/index.js',
+        ],
+      },
+      'bundle.js': {
+        modules: [
+          '/path/to/node_modules/C/index.js',
+          '/path/to/src/page/A/index.js',
+          '/path/to/src/page/B/index.js',
+        ],
+      },
+    })
     t.end()
   })
   source().pipe(groupsStream)
@@ -155,33 +152,32 @@ test('stray modules', function(t) {
     basedir: '/path/to/src',
     groupFilter: [
       {
-        filter: '**/page/A/index.js',
+        filter: 'page/A/index.js',
       },
       {
-        filter: '**/page/B/index.js',
+        filter: 'page/B/index.js',
       },
     ],
   })
-  groupsStream.once('groups', function (groupsMap) {
-    t.same(groupsMap.size, 2)
-    t.same(
-      sort(groupsMap.get('page/A/index.js')),
-      [
-        '/path/to/node_modules/C/index.js',
-        '/path/to/node_modules/E/index.js',
-        '/path/to/src/page/A/index.js',
-        '/path/to/src/page/D/index.js',
-      ]
-    )
-    t.same(
-      sort(groupsMap.get('page/B/index.js')),
-      [
-        '/path/to/node_modules/C/index.js',
-        '/path/to/node_modules/E/index.js',
-        '/path/to/src/page/B/index.js',
-        '/path/to/src/page/D/index.js',
-      ]
-    )
+  groupsStream.once('map', function (bundleMap) {
+    t.same(sort(bundleMap), {
+      'page/A/index.js': {
+        modules: [
+          '/path/to/node_modules/C/index.js',
+          '/path/to/node_modules/E/index.js',
+          '/path/to/src/page/A/index.js',
+          '/path/to/src/page/D/index.js',
+        ],
+      },
+      'page/B/index.js': {
+        modules: [
+          '/path/to/node_modules/C/index.js',
+          '/path/to/node_modules/E/index.js',
+          '/path/to/src/page/B/index.js',
+          '/path/to/src/page/D/index.js',
+        ],
+      },
+    })
     t.end()
   })
   groupsStream.write({
@@ -224,9 +220,10 @@ function source() {
   return ret
 }
 
-function sort(set) {
-  let arr = []
-  set.forEach(v => arr.push(v))
-  return arr.sort()
+function sort(o) {
+  Object.keys(o).forEach(function (k) {
+    o[k].modules.sort()
+  })
+  return o
 }
 

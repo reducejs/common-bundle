@@ -228,8 +228,6 @@ among those created through the [`groups`](#groups) option.
 
 Type: `Array`
 
-**NOTE**: if there is only one single original bundle, this option is ignored.
-
 Examples:
 
 ```javascript
@@ -260,13 +258,13 @@ b.plugin('common-bundle', {
 
 ```
 
-**output**:
+**output**
 
 Type: `String`
 
 File path to the new bundle for sharing.
 
-**filter**:
+**filter**
 
 Specify which bundles to share the new bundle.
 
@@ -280,6 +278,69 @@ Type: `String`, `Array`
 Passed to [`multimatch`] to determine bundles to share the new bundle.
 
 
+**NOTE**
+If there is only one single original bundle,
+this option is ignored.
+
+**NOTE**
+If this option is specified as an array,
+each element is processed one by one in the index order.
+
+So, the `filter` can use common bundles created before,
+which means we can create a common bundle from existing common bundles.
+
+```js
+b.plugin('common-bundle', {
+  common: [
+    {
+      output: 'ab.js',
+      filter: ['page/A/index.js', 'page/B/index.js'],
+    },
+    {
+      output: 'bc.js',
+      filter: ['page/C/index.js', 'page/B/index.js'],
+    },
+    {
+      output: 'ac.js',
+      filter: ['page/A/index.js', 'page/C/index.js'],
+    },
+    {
+      // abc.js will contain modules shared by ab.js, bc.js and ac.js
+      output: 'abc.js',
+      filter: ['ab.js', 'bc.js', 'ac.js'],
+    },
+  ],
+})
+
+```
+
+If `output` is specified as an existing bundle,
+bundles matched by `filter` will be made dependent upon it,
+and modules are removed if present already in `output`.
+
+```js
+b.plugin('common-bundle', {
+  common: [
+    {
+      output: 'bundle.js',
+      filter: ['page/A/index.js', 'page/B/index.js'],
+    },
+    {
+      output: 'component.js',
+      filter: 'component/**/index.js',
+    },
+    {
+      // Now we can load component.js asynchronously in A, and B,
+      // with no component loaded twice.
+      output: 'bundle.js',
+      filter: 'component.js',
+    },
+  ],
+})
+
+```
+
+
 #### basedir
 Specify how to name the bundles created.
 
@@ -289,14 +350,73 @@ Type: `String`
 
 ### Events
 
-#### b.on('common.map', map => {})
-**map**
+#### b.on('common.map', (bundleMap, inputMap) => {})
 
-You can use `Object.keys(map)` to get paths (`file.relative`) to all bundles.
+Suppose there are two pages, `hi` and `hello`,
+both depend upon `lodash` and `say`.
 
-In addition, `map[bundle]` is an object with the following fields:
-* `modules`: `Array`. Paths to modules (relative to `basedir`) packed into `bundle`
-* `deps`: `Array`. Paths to common bundles (`file.relative`) that `bundle` depends upon.
+We can use the following options to create a `common.js`,
+and check `bundleMap` and `inputMap`.
+
+```js
+b.plugin(require('../..'), {
+  groups: 'page/**/index.js',
+  common: 'common.js',
+})
+b.on('common.map', function (bundleMap, inputMap) {
+  console.log(JSON.stringify(bundleMap, null, 2))
+  console.log(JSON.stringify(inputMap, null, 2))
+})
+
+```
+
+**bundleMap**
+
+```js
+{
+  // bundle => {}
+  "page/hi/index.js": {
+    "modules": [
+      // modules in this bundle
+      "page/hi/index.js"
+    ],
+    "deps": [
+      // bundles should come before this bundle
+      "common.js"
+    ]
+  },
+  "page/hello/index.js": {
+    "modules": [
+      "page/hello/index.js"
+    ],
+    "deps": [
+      "common.js"
+    ]
+  },
+  "common.js": {
+    "modules": [
+      "node_modules/lodash/index.js",
+      "web_modules/say/index.js"
+    ]
+  }
+}
+
+```
+
+**inputMap**
+
+```js
+{
+  // input file => [bundles]
+  "page/hello/index.js": [
+    "page/hello/index.js"
+  ],
+  "page/hi/index.js": [
+    "page/hi/index.js"
+  ]
+}
+
+```
 
 #### b.on('common.pipeline', (id, pipeline) => {})
 

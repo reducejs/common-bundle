@@ -10,9 +10,10 @@ const basedir = path.resolve(__dirname, 'src')
 const entries = glob.sync('page/**/index.js', { cwd: basedir })
 const b = browserify(entries, {
   basedir: basedir,
+  cache: {},
+  packageCache: {},
   paths: [path.resolve(__dirname, 'src', 'web_modules')],
 })
-const build = path.resolve(__dirname, 'build')
 
 b.plugin(require('../..'), {
   groups: 'page/**/index.js',
@@ -28,10 +29,17 @@ b.plugin(require('../..'), {
   ],
 })
 
-del.sync(build)
-b.on('common.map', function (bundleMap, inputMap) {
-  console.log(JSON.stringify(bundleMap, null, 2))
-  console.log(JSON.stringify(inputMap, null, 2))
-})
-b.bundle().pipe(vfs.dest(build))
+b.plugin('watchify2', { entryGlob: 'page/**/index.js' })
+
+function bundle() {
+  let build = path.resolve(__dirname, 'build')
+  del.sync(build)
+  b.bundle().pipe(vfs.dest(build))
+}
+
+b.on('update', bundle)
+
+b.on('log', console.log.bind(console))
+
+bundle()
 

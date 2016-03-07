@@ -27,6 +27,7 @@ module.exports = function (b, opts) {
   function end(done) {
     var noop = function () {}
     var output = through.obj(noop, noop)
+
     var vinylStream = vinylify({
       basedir: basedir,
       groupFilter: opts.groups || input,
@@ -45,27 +46,30 @@ module.exports = function (b, opts) {
       },
     })
 
-    var map = {}
-    vinylStream.on('output', function (id, file) {
-      map[id] = map[id] || {}
-      map[id].modules = map[id].modules || []
-      map[id].modules.push(path.relative(basedir, file))
+    var inputFiles = input.map(file => path.relative(basedir, file))
+    vinylStream.once('map', function (bundleMap) {
+      var inputMap = inputFiles.reduce(function (o, file) {
+        o[file] = []
+        return o
+      }, Object.create(null))
+      for (let bundle in bundleMap) {
+        let modules = bundleMap[bundle].modules
+        modules = Object.keys(modules).map(id => path.relative(basedir, modules[id]))
+        bundleMap[bundle].modules = modules
+        let moduleMap = modules.reduce(function (o, file) {
+          o[file] = true
+          return o
+        }, Object.create(null))
+        inputFiles.forEach(function (file) {
+          if (moduleMap[file]) {
+            inputMap[file].push(bundle)
+          }
+        })
+      }
+      b.emit('common.map', bundleMap, inputMap)
     })
-    vinylStream.once('common', function (bundle2common) {
-      bundle2common.forEach(function (commons, id) {
-        map[id] = map[id] || {}
-        map[id].deps = []
-        for (let i of commons) {
-          map[id].deps.push(i)
-        }
-      })
-    })
-
     vinylStream.on('data', file => output.push(file))
-    vinylStream.once('end', function () {
-      output.push(null)
-      b.emit('common.map', map)
-    })
+    vinylStream.once('end', () => output.push(null))
 
     b.pipeline.get('pack').unshift(
       through.obj(function (row, _, next) {
