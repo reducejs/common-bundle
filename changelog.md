@@ -1,4 +1,27 @@
-<!-- 44a15a1 1456908550000 -->
+<!-- 7be0f64 1457441745000 -->
+
+## [v0.4.0](https://github.com/reducejs/common-bundle/commit/7be0f64) (2016-03-08)
+
+* [[`62e67b0`](https://github.com/reducejs/common-bundle/commit/62e67b0)] readme
+
+* [[`6d17bef`](https://github.com/reducejs/common-bundle/commit/6d17bef)] readme
+
+* [[`3da5348`](https://github.com/reducejs/common-bundle/commit/3da5348)] readme, watchify2
+
+* [[`3c4ec28`](https://github.com/reducejs/common-bundle/commit/3c4ec28)] readme: remove useless text
+
+* [[`74f7921`](https://github.com/reducejs/common-bundle/commit/74f7921)] Fix
+
+    
+    * remove unused code in util
+    * groups: fix relative globs in filter
+    * groups: pass row to output function as the second arg
+
+* [[`8a799e3`](https://github.com/reducejs/common-bundle/commit/8a799e3)] Feature: inputMap and common of commons
+
+* [[`633a765`](https://github.com/reducejs/common-bundle/commit/633a765)] collect input
+
+* [[`e15766e`](https://github.com/reducejs/common-bundle/commit/e15766e)] changelog
 
 ## [v0.3.3](https://github.com/reducejs/common-bundle/commit/44a15a1) (2016-03-02)
 
