@@ -356,65 +356,6 @@ Passed to [`multimatch`] to determine bundles to share the new bundle.
 If there is only one single original bundle,
 this option is ignored.
 
-**NOTE**
-If this option is specified as an array,
-each element is processed one by one in the index order.
-
-So, the `filter` can use common bundles created before,
-which means we can create a common bundle from existing common bundles.
-
-```js
-b.plugin('common-bundle', {
-  common: [
-    {
-      output: 'ab.js',
-      filter: ['page/A/index.js', 'page/B/index.js'],
-    },
-    {
-      output: 'bc.js',
-      filter: ['page/C/index.js', 'page/B/index.js'],
-    },
-    {
-      output: 'ac.js',
-      filter: ['page/A/index.js', 'page/C/index.js'],
-    },
-    {
-      // abc.js will contain modules shared by ab.js, bc.js and ac.js
-      output: 'abc.js',
-      filter: ['ab.js', 'bc.js', 'ac.js'],
-    },
-  ],
-})
-
-```
-
-If `output` is specified as an existing bundle,
-bundles matched by `filter` will be made dependent upon it,
-and modules are removed if present already in `output`.
-
-```js
-b.plugin('common-bundle', {
-  common: [
-    {
-      output: 'bundle.js',
-      filter: ['page/A/index.js', 'page/B/index.js'],
-    },
-    {
-      output: 'component.js',
-      filter: 'component/**/index.js',
-    },
-    {
-      // Now we can load component.js asynchronously in A, and B,
-      // with no component loaded twice.
-      output: 'bundle.js',
-      filter: 'component.js',
-    },
-  ],
-})
-
-```
-
-
 #### basedir
 Specify how to name the bundles created.
 
