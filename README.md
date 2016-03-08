@@ -136,7 +136,7 @@ Specify some entries and create a bundle for containing them and their dependenc
 
 ##### typeof options.groups === 'object'
 
-**options.groups.output**
+* `options.groups.output`
 
 Specify the path to the new bundle
 
@@ -178,7 +178,7 @@ Type: `Falsy`
 If `options.groups.filter` says that the given module should go to a new bundle,
 `path.relative(basedir, moduleFile)` is used as the file path to the new bundle.
 
-**options.groups.filter**
+* `options.groups.filter`
 
 Specify the the entries that should go to the new bundle
 
@@ -234,7 +234,7 @@ this option is ignored.
 
 ##### typeof options.common === 'object'
 
-**options.common.output**
+* `options.common.output`
 
 Specify the file path to the new common bundle.
 
@@ -253,7 +253,7 @@ b.plugin('common-bundle', {
 
 ```
 
-**options.common.filter**
+* `options.common.filter`
 
 Specify which group of bundles should share the new common bundle.
 
