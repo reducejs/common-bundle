@@ -252,6 +252,19 @@ test('createRaw', function (t) {
     util.createRaw({
       a: { modules: ['a', 'c'] },
       b: { modules: ['b', 'c'] },
+    }, { output: 'common' }),
+    {
+      a: { modules: ['a', 'c'], deps: ['common'] },
+      b: { modules: ['b', 'c'], deps: ['common'] },
+      common: { modules: ['c'] },
+    },
+    'no filter'
+  )
+
+  t.same(
+    util.createRaw({
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'] },
     }, 'common'),
     {
       a: { modules: ['a', 'c'], deps: ['common'] },

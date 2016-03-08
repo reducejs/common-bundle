@@ -137,12 +137,8 @@ b.plugin('common-bundle', options)
 ### options
 
 #### groups
-This options is used to create original bundles,
-which will be used to generate additional shared bundles
-later according to the [`common`](#common) option.
-
-Specify which modules (and all of their dependencies)
-to be packed together into which bundle.
+This options is used to create original bundles.
+It specifies a bundle should include which modules (with all their dependencies).
 
 Type: `Array`
 
@@ -150,15 +146,19 @@ Type: `Array`
 [
   {
     output: function (file) {
+      // bundle A.js should contain the matched modules
       if (/A/.test(file)) {
         return 'A.js'
       }
+      // bundle B.js should contain the matched modules
       if (/B/.test(file)) {
         return 'B.js'
       }
+      // bundle C.js should contain the matched modules
       if (/C/.test(file)) {
         return 'C.js'
       }
+      // other modules will be included into all bundles created
     },
   },
 ]
@@ -190,22 +190,21 @@ Or:
 Type: `Function`
 
 Receives the file path to a module,
-and should return the file path of the bundle
-which should contain that module.
+and should return the file path of the target bundle.
 
 If a falsy value returned,
-the module will appear either in all bundles
-or bundles containing its dependents.
+the module will follow its dependents.
+If it has no dependents,
+then it go to all bundles created.
 
 Type: `String`
 
-Specify the file path of the bundle to be created.
+Specify the file path of the bundle.
 
-Type: `Falsy`
+If not specified, the file path to the new bundle
+is determined by `path.relative(basedir, moduleFile)`.
 
-The file path to the new bundle is determined by the result of `path.relative(basedir, file)`.
-
-`basedir` can be specified by [`basedir`](#basedir).
+`basedir` can be specified by the [`basedir`](#basedir) option.
 
 **filter**:
 
@@ -216,42 +215,117 @@ Type: `Function`
 
 Receives the file path to a module.
 
-If `true` returned, that module will be packed into this new bundle.
+If `true` returned,
+that module will be packed into the new bundle.
 
 Type: `String`, `Array`
 
 Passed to [`multimatch`] to test module files.
 
 #### common
-This options is used to create bundles for sharing
-among those created through the [`groups`](#groups) option.
+The [`groups`](#groups) option specifies
+how many bundles to be created,
+as well as which modules each bundle should contain.
+We call them original bundles.
 
-Type: `Array`
+The original bundles (or some of them)
+may share a lot of common modules.
+We can use the `common` option to create common bundles
+containing the shared modules,
+and remove them from the original bundles.
 
-Examples:
+Type: `Object`
 
-```javascript
-// Pack modules shared by all original bundles into `common.js`
+```js
+// Modules shared by all original bundles go to `common.js`
 b.plugin('common-bundle', {
   common: {
+    // the file path to the new common bundle
     output: 'common.js',
+    // the filter glob will be used to match original bundles
     filter: '**/*.js',
   },
 })
 
+```
+
+If we mean to match all bundles created,
+the `filter` can be omitted,
+and the `common` option could be specified like:
+
+```js
+b.plugin('common-bundle', { common: 'common.js' })
+
+```
+
+Type: `Array`
+
+Things may go crazy when the `common` option is specified as an array of common configurations.
+
+```javascript
 b.plugin('common-bundle', {
+  // create original page-specific bundles
+  // with path `page/**/index.js` for each page A, B, C, D
+  groups: 'page/**/index.js',
   common: [
     {
+      // new common bundle
       output: 'ab.js',
+      // match against the four page-specific bundles
       filter: ['page/A/index.js', 'page/B/index.js'],
     },
     {
-      output: 'bc.js',
-      filter: ['page/C/index.js', 'page/B/index.js'],
+      // new common bundle
+      output: 'cd.js',
+      // match against the four page-specific bundles and `ab.js`
+      filter: ['page/C/index.js', 'page/D/index.js'],
     },
     {
-      output: 'ac.js',
-      filter: ['page/A/index.js', 'page/C/index.js'],
+      // new common bundle
+      output: 'common.js',
+      // match against the four page-specific bundles,
+      // `ab.js`, and `cd.js`
+      filter: ['ab.js', 'cd.js'],
+    },
+  ],
+})
+
+```
+
+The first configuration is processed the way above
+to create a new common bundle.
+
+However, when processing the second,
+its `filter` will match against all the known bundles,
+including the original bundles
+and the common bundle created from the first configuration.
+
+The same thing happens for the third configuration,
+and so on and on.
+
+Thus, common of common bundles could be possible,
+like `common.js` in the example above.
+
+What if two configurations share the same `output`?
+
+```js
+b.plugin('common-bundle', {
+  groups: 'page/**/index.js',
+  common: [
+    {
+      output: 'common.js',
+      filter: ['page/A/index.js', 'page/B/index.js'],
+    },
+    {
+      output: 'minor.js',
+      filter: ['page/**/index.js', '!page/A/index.js', '!page/B/index.js'],
+    },
+    {
+      // common.js has already been created
+      output: 'common.js',
+      // nothing happens to common.js
+      // but modules in minor.js are removed if they are also in common.js
+      filter: 'minor.js',
     },
   ],
 })

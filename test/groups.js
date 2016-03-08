@@ -4,6 +4,106 @@ const test = require('tap').test
 const Groups = require('../lib/groups')
 const through = require('../lib/through')
 
+test('resolveGlob', function (t) {
+  var basedir = '/path/to/src'
+  t.equal(
+    Groups.resolveGlob('/path/to/build', basedir),
+    '/path/to/build'
+  )
+
+  t.equal(
+    Groups.resolveGlob('page/A/index.js', basedir),
+    '/path/to/src/page/A/index.js'
+  )
+
+  t.equal(
+    Groups.resolveGlob('**/page/A/index.js', basedir),
+    '**/page/A/index.js'
+  )
+
+  t.equal(
+    Groups.resolveGlob('!**/page/A/index.js', basedir),
+    '!**/page/A/index.js'
+  )
+
+  t.equal(
+    Groups.resolveGlob('!page/A/index.js', basedir),
+    '!/path/to/src/page/A/index.js'
+  )
+
+  t.end()
+})
+
+test('createFilter', function (t) {
+  var basedir = '/path/to/src'
+  t.equal(
+    Groups.createFilter(1, basedir),
+    Function.prototype,
+    'invalid option'
+  )
+
+  t.equal(
+    Groups.createFilter(s => s + '/index.js', basedir)('/path/to/src/page/A'),
+    'page/A/index.js',
+    'function, return absolute path'
+  )
+
+  t.equal(
+    Groups.createFilter(() => null, basedir)('/path/to/src/page/A'),
+    undefined,
+    'function, return undefined'
+  )
+
+  t.equal(
+    Groups.createFilter(
+      {
+        output: () => 'page/A/index.js',
+      },
+      basedir
+    )('/path/to/src/page/A'),
+    'page/A/index.js',
+    'object, output function, return relative path'
+  )
+
+  t.equal(
+    Groups.createFilter('page/**/index.js', basedir)('/path/to/src/page/A/index.js'),
+    'page/A/index.js',
+    'string'
+  )
+
+  t.equal(
+    Groups.createFilter(['page/**/index.js', '!page/A/index.js'], basedir)('/path/to/src/page/A/index.js'),
+    undefined,
+    'array, negative, not matched'
+  )
+
+  t.equal(
+    Groups.createFilter(['page/**/index.js', '!**/A/index.js'], basedir)('/path/to/src/page/A/index.js'),
+    undefined,
+    'array, negative, not matched, 2'
+  )
+
+  t.equal(
+    Groups.createFilter(['page/**/index.js', '!page/A/index.js'], basedir)('/path/to/src/page/B/index.js'),
+    'page/B/index.js',
+    'array, negative, matched'
+  )
+
+  t.equal(
+    Groups.createFilter({ output: 'bundle.js' }, basedir)('/path/to/src/page/B/index.js'),
+    'bundle.js',
+    'output, string'
+  )
+
+  t.equal(
+    Groups.createFilter({ filter: () => true }, basedir)('/path/to/src/page/B/index.js'),
+    'page/B/index.js',
+    'filter, function'
+  )
+
+  t.end()
+})
+
 test('groupFilter.entries', function(tt) {
   function run(filter, t) {
     let groups = new Groups({
