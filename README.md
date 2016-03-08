@@ -446,35 +446,67 @@ You can call `pipeline.get` with a label name to get a handle on a stream pipeli
 
 Event handlers must be attached *before* calling `b.plugin`.
 
-## Work with [`watchify`] and [`gulp`]
+## Work with [`watchify2`] and [`gulp`]
 
 ```javascript
 var through = require('through2')
+var browserify = require('browserify')
 
-var b = browserify(entries, opts)
-  .plugin('common-bundle', bundleOpts)
+gulp.task('build', function() {
+  var b = browserify({ basedir: '/path/to/src' })
+  b.plugin('common-bundle', {
+    // page-specific bundles
+    groups: 'page/**/index.js',
+    // common bundle shared by all pages
+    common: 'common.js',
+  })
 
-function bundle() {
-  return b.bundle()
+  return gulp.src('page/**/index.js', {
+    cwd: b._options.basedir,
+    read: false,
+  })
+  .pipe(through.obj(function (file, _, next) {
+    b.add(file.path)
+    next()
+  }, function (next) {
+    b.bundle()
+      .on('data', file => this.push(file))
+      .on('end', () => this.push(null))
+  }))
+  .pipe(gulp.dest('build'))
+})
 
-    .pipe(through.obj(function (file, _, next) {
-      // Log bundles created
-      b.emit('log', file.relative)
-      next(null, file)
-    }))
+gulp.task('watch', function (cb) {
+  var b = browserify({ basedir: '/path/to/src' })
+  b.plugin('common-bundle', {
+    // page-specific bundles
+    groups: 'page/**/index.js',
+    // common bundle shared by all pages
+    common: 'common.js',
+  })
 
-    // maybe `vinyl-buffer` is needed to apply
-    // more gulp plugins here
+  b.plugin('watchify2', {
+    // now we can add or remove page entries
+    // and that would cause `b.bundle()` to be executed.
+    entryGlob: 'page/**/index.js',
+  })
+  gulp.src('page/**/index.js', {
+    cwd: b._options.basedir,
+    read: false,
+  })
+  .pipe(through.obj(function (file, _, next) {
+    b.add(file.path)
+    next()
+  }, function (next) {
+    b.on('update', bundle)
+    bundle()
+  }))
 
-    .pipe(gulp.dest('build'))
-}
-
-gulp.task('build', bundle)
-
-gulp.task('watch', function () {
-  b.plugin('watchify')
-  b.on('update', bundle)
-  bundle()
+  function bundle() {
+    b.bundle().pipe(gulp.dest('build'))
+      .on('data', file => console.log('bundle:', file.relative))
+      .on('end', () => console.log('-'.repeat(40)))
+  }
 })
 
 ```
