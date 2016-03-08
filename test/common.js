@@ -1,192 +1,461 @@
 'use strict'
 
 const test = require('tap').test
-const common = require('../lib/common')
-const util = require('../lib/util')
+const util = require('../lib/common')
 
-function toMap(o) {
-  let ret = new Map()
-  for (let k in o) {
-    ret.set(k, new Set(o[k]))
-  }
-  return ret
-}
+test('intersection', function (t) {
+  t.same(
+    util.intersection([]), [], 'empty sets'
+  )
 
-function toObj(map) {
-  let o = {}
-  map.forEach(function (v, k) {
-    o[k] = util.toArray(v)
-  })
-  return o
-}
+  t.same(
+    util.intersection([1]), [1], 'single array'
+  )
 
-const originalGroupsMap = toMap({
-  'page/A/index.js': [
-    '/path/to/src/page/A/index.js',
-    '/path/to/src/lib/a.js',
-    '/path/to/src/lib/ab.js',
-    '/path/to/src/lib/ac.js',
-    '/path/to/src/lib/abc.js',
-  ],
-  'page/B/index.js': [
-    '/path/to/src/page/B/index.js',
-    '/path/to/src/lib/b.js',
-    '/path/to/src/lib/ab.js',
-    '/path/to/src/lib/bc.js',
-    '/path/to/src/lib/abc.js',
-  ],
-  'page/C/index.js': [
-    '/path/to/src/page/C/index.js',
-    '/path/to/src/lib/c.js',
-    '/path/to/src/lib/ac.js',
-    '/path/to/src/lib/bc.js',
-    '/path/to/src/lib/abc.js',
-  ],
+  t.same(
+    util.intersection([1], [2]), [], 'no intersection'
+  )
+
+  t.same(
+    util.intersection([1], [2, 1], [1]), [1], 'intersection'
+  )
+
+  t.end()
 })
 
-test('one common for all', function(t) {
-  let ret = common(originalGroupsMap, 'common.js')
+test('clean', function (t) {
   t.same(
-    toObj(ret.bundle2common),
+    util.clean({}),
+    {}
+  )
+
+  t.same(
+    util.clean({ a: {} }),
+    {}
+  )
+
+  t.same(
+    util.clean({ a: { modules: [] } }),
+    {}
+  )
+
+  t.same(
+    util.clean({ a: { modules: ['a'] } }),
+    { a: { modules: ['a'] } }
+  )
+
+  t.same(
+    util.clean({
+      a: {
+        modules: [],
+        deps: ['b'],
+      },
+      b: {
+        modules: ['b'],
+      },
+    }),
     {
-      'page/A/index.js': [ 'common.js' ],
-      'page/B/index.js': [ 'common.js' ],
-      'page/C/index.js': [ 'common.js' ],
+      a: {
+        modules: [],
+        deps: ['b'],
+      },
+      b: {
+        modules: ['b'],
+      },
     }
   )
+
   t.same(
-    toObj(ret.bundle2module),
+    util.clean({
+      a: {
+        modules: [],
+        deps: ['b'],
+      },
+      b: {
+        modules: [],
+      },
+    }),
+    {}
+  )
+
+  t.end()
+})
+
+test('dedupe', function (t) {
+  t.same(
+    util.dedupe({}),
+    {}
+  )
+
+  t.same(
+    util.dedupe({
+      a: { modules: ['a'] },
+    }),
     {
-      'page/A/index.js': [
-        '/path/to/src/page/A/index.js',
-        '/path/to/src/lib/a.js',
-        '/path/to/src/lib/ab.js',
-        '/path/to/src/lib/ac.js',
-      ],
-      'page/B/index.js': [
-        '/path/to/src/page/B/index.js',
-        '/path/to/src/lib/b.js',
-        '/path/to/src/lib/ab.js',
-        '/path/to/src/lib/bc.js',
-      ],
-      'page/C/index.js': [
-        '/path/to/src/page/C/index.js',
-        '/path/to/src/lib/c.js',
-        '/path/to/src/lib/ac.js',
-        '/path/to/src/lib/bc.js',
-      ],
-      'common.js': [
-        '/path/to/src/lib/abc.js',
-      ],
+      a: { modules: ['a'] },
+    }
+  )
+
+  t.same(
+    util.dedupe({
+      a: { modules: ['a'], deps: ['b'] },
+      b: { modules: ['a', 'b'] },
+    }),
+    {
+      a: { modules: [], deps: ['b'] },
+      b: { modules: ['a', 'b'] },
+    }
+  )
+
+  t.same(
+    util.dedupe({
+      a: { modules: ['a', 'aa'], deps: ['b', 'c'] },
+      b: { modules: ['a', 'b'] },
+      c: { modules: ['aa', 'c'] },
+    }),
+    {
+      a: { modules: [], deps: ['b', 'c'] },
+      b: { modules: ['a', 'b'] },
+      c: { modules: ['aa', 'c'] },
+    }
+  )
+
+  t.same(
+    util.dedupe({
+      a: { modules: ['a', 'b', 'c'], deps: ['b', 'c'] },
+      b: { modules: ['b', 'c'], deps: ['c'] },
+      c: { modules: ['c'] },
+    }),
+    {
+      a: { modules: ['a'], deps: ['b', 'c'] },
+      b: { modules: ['b'], deps: ['c'] },
+      c: { modules: ['c'] },
     }
   )
 
   t.end()
 })
 
-test('one common for each group', function(t) {
-  let ret = common(originalGroupsMap, [
-    {
-      output: 'ab.js',
-      filter: ['page/A/index.js', 'page/B/index.js'],
-    },
-    {
-      output: 'bc.js',
-      filter: ['page/C/index.js', 'page/B/index.js'],
-    },
-    {
-      output: 'ac.js',
-      filter: ['page/A/index.js', 'page/C/index.js'],
-    },
-    {
-      output: 'common.js',
-      filter: '**/*.js',
-    },
-  ])
+test('mergeDeps', function (t) {
   t.same(
-    toObj(ret.bundle2common),
+    util.mergeDeps({}),
+    {}
+  )
+
+  t.same(
+    util.mergeDeps({
+      a: { deps: [] },
+    }),
     {
-      'page/A/index.js': [ 'ab.js', 'ac.js', 'common.js' ],
-      'page/B/index.js': [ 'ab.js', 'bc.js', 'common.js' ],
-      'page/C/index.js': [ 'bc.js', 'ac.js', 'common.js' ],
+      a: { deps: [] },
     }
   )
+
   t.same(
-    toObj(ret.bundle2module),
+    util.mergeDeps({
+      a: { deps: ['b'] },
+      b: {},
+    }),
     {
-      'page/A/index.js': [
-        '/path/to/src/page/A/index.js',
-        '/path/to/src/lib/a.js',
-      ],
-      'page/B/index.js': [
-        '/path/to/src/page/B/index.js',
-        '/path/to/src/lib/b.js',
-      ],
-      'page/C/index.js': [
-        '/path/to/src/page/C/index.js',
-        '/path/to/src/lib/c.js',
-      ],
-      'common.js': [
-        '/path/to/src/lib/abc.js',
-      ],
-      'ab.js': [
-        '/path/to/src/lib/ab.js',
-        '/path/to/src/lib/abc.js',
-      ],
-      'bc.js': [
-        '/path/to/src/lib/bc.js',
-        '/path/to/src/lib/abc.js',
-      ],
-      'ac.js': [
-        '/path/to/src/lib/ac.js',
-        '/path/to/src/lib/abc.js',
-      ],
+      a: { deps: ['b'] },
+      b: {},
+    }
+  )
+
+  t.same(
+    util.mergeDeps({
+      a: { deps: ['b'] },
+      b: { deps: [] },
+    }),
+    {
+      a: { deps: ['b'] },
+      b: { deps: [] },
+    }
+  )
+
+  t.same(
+    util.mergeDeps({
+      a: { deps: ['b'] },
+      b: { deps: ['c'] },
+      c: {},
+    }),
+    {
+      a: { deps: ['c', 'b'] },
+      b: { deps: ['c'] },
+      c: {},
+    }
+  )
+
+  t.same(
+    util.mergeDeps({
+      a: { deps: ['b', 'c'] },
+      b: { deps: ['c'] },
+      c: {},
+    }),
+    {
+      a: { deps: ['c', 'b'] },
+      b: { deps: ['c'] },
+      c: {},
+    }
+  )
+
+  t.same(
+    util.mergeDeps({
+      a: {
+        modules: ['a', 'ab', 'ac', 'abc'],
+        deps: ['ab', 'ac'],
+      },
+      b: {
+        modules: ['b', 'bc', 'ab', 'abc'],
+        deps: ['ab', 'bc'],
+      },
+      c: {
+        modules: ['c', 'ac', 'bc', 'abc'],
+        deps: ['ac', 'bc'],
+      },
+      ab: { modules: ['ab', 'abc'], deps: ['abc'] },
+      bc: { modules: ['bc', 'abc'], deps: ['abc'] },
+      ac: { modules: ['ac', 'abc'], deps: ['abc'] },
+      abc: { modules: ['abc'] },
+    }),
+    {
+      a: {
+        modules: ['a', 'ab', 'ac', 'abc'],
+        deps: ['abc', 'ab', 'ac'],
+      },
+      b: {
+        modules: ['b', 'bc', 'ab', 'abc'],
+        deps: ['abc', 'ab', 'bc'],
+      },
+      c: {
+        modules: ['c', 'ac', 'bc', 'abc'],
+        deps: ['abc', 'ac', 'bc'],
+      },
+      ab: { modules: ['ab', 'abc'], deps: ['abc'] },
+      bc: { modules: ['bc', 'abc'], deps: ['abc'] },
+      ac: { modules: ['ac', 'abc'], deps: ['abc'] },
+      abc: { modules: ['abc'] },
     }
   )
 
   t.end()
 })
 
-test('common function', function(t) {
-  let ret = common(originalGroupsMap, {
-    output: 'common.js',
-    filter: function (groups) {
-      return groups
-    },
-  })
+test('createRaw', function (t) {
   t.same(
-    toObj(ret.bundle2common),
-    {
-      'page/A/index.js': [ 'common.js' ],
-      'page/B/index.js': [ 'common.js' ],
-      'page/C/index.js': [ 'common.js' ],
-    }
+    util.createRaw({ x: 1 }),
+    { x: 1 },
+    'undefined'
   )
+
   t.same(
-    toObj(ret.bundle2module),
+    util.createRaw({
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'] },
+    }, { output: 'common' }),
     {
-      'page/A/index.js': [
-        '/path/to/src/page/A/index.js',
-        '/path/to/src/lib/a.js',
-        '/path/to/src/lib/ab.js',
-        '/path/to/src/lib/ac.js',
-      ],
-      'page/B/index.js': [
-        '/path/to/src/page/B/index.js',
-        '/path/to/src/lib/b.js',
-        '/path/to/src/lib/ab.js',
-        '/path/to/src/lib/bc.js',
-      ],
-      'page/C/index.js': [
-        '/path/to/src/page/C/index.js',
-        '/path/to/src/lib/c.js',
-        '/path/to/src/lib/ac.js',
-        '/path/to/src/lib/bc.js',
-      ],
-      'common.js': [
-        '/path/to/src/lib/abc.js',
-      ],
-    }
+      a: { modules: ['a', 'c'], deps: ['common'] },
+      b: { modules: ['b', 'c'], deps: ['common'] },
+      common: { modules: ['c'] },
+    },
+    'no filter'
+  )
+
+  t.same(
+    util.createRaw({
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'] },
+    }, 'common'),
+    {
+      a: { modules: ['a', 'c'], deps: ['common'] },
+      b: { modules: ['b', 'c'], deps: ['common'] },
+      common: { modules: ['c'] },
+    },
+    'string'
+  )
+
+  t.same(
+    util.createRaw({
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'] },
+    }, {
+      output: 'common',
+      filter: function (bundles) {
+        return bundles
+      },
+    }),
+    {
+      a: { modules: ['a', 'c'], deps: ['common'] },
+      b: { modules: ['b', 'c'], deps: ['common'] },
+      common: { modules: ['c'] },
+    },
+    'function'
+  )
+
+  t.same(
+    util.createRaw({
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'] },
+    }, {
+      output: 'common',
+      filter: '+(a|b)',
+    }),
+    {
+      a: { modules: ['a', 'c'], deps: ['common'] },
+      b: { modules: ['b', 'c'], deps: ['common'] },
+      common: { modules: ['c'] },
+    },
+    'glob'
+  )
+
+  t.same(
+    util.createRaw({
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'] },
+    }, {
+      output: 'common',
+      filter: 'd',
+    }),
+    {
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'] },
+    },
+    'empty targets'
+  )
+
+  t.same(
+    util.createRaw({
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'] },
+    }, {
+      output: 'a',
+      filter: 'b',
+    }),
+    {
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'], deps: ['a'] },
+    },
+    'output already exists'
+  )
+
+  t.same(
+    util.createRaw({
+      a: { modules: ['a', 'ab', 'ac', 'abc'] },
+      b: { modules: ['b', 'bc', 'ab', 'abc'] },
+      c: { modules: ['c', 'ac', 'bc', 'abc'] },
+    }, [
+      {
+        output: 'ab',
+        filter: '+(a|b)',
+      },
+      {
+        output: 'ac',
+        filter: '+(a|c)',
+      },
+      {
+        output: 'bc',
+        filter: '+(b|c)',
+      },
+      {
+        output: 'abc',
+        filter: '+(ab|bc|ac)',
+      },
+    ]),
+    {
+      a: {
+        modules: ['a', 'ab', 'ac', 'abc'],
+        deps: ['ab', 'ac'],
+      },
+      b: {
+        modules: ['b', 'bc', 'ab', 'abc'],
+        deps: ['ab', 'bc'],
+      },
+      c: {
+        modules: ['c', 'ac', 'bc', 'abc'],
+        deps: ['ac', 'bc'],
+      },
+      ab: { modules: ['ab', 'abc'], deps: ['abc'] },
+      bc: { modules: ['bc', 'abc'], deps: ['abc'] },
+      ac: { modules: ['ac', 'abc'], deps: ['abc'] },
+      abc: { modules: ['abc'] },
+    },
+    'common of commons'
+  )
+
+  t.end()
+})
+
+test('create', function (t) {
+  t.same(
+    util.create({
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'] },
+    }, 'common'),
+    {
+      a: { modules: ['a'], deps: ['common'] },
+      b: { modules: ['b'], deps: ['common'] },
+      common: { modules: ['c'] },
+    },
+    'string'
+  )
+
+  t.same(
+    util.create({
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b', 'c'] },
+    }, {
+      output: 'a',
+      filter: 'b',
+    }),
+    {
+      a: { modules: ['a', 'c'] },
+      b: { modules: ['b'], deps: ['a'] },
+    },
+    'output already exists'
+  )
+
+  t.same(
+    util.create({
+      a: { modules: ['a', 'ab', 'ac', 'abc'] },
+      b: { modules: ['b', 'bc', 'ab', 'abc'] },
+      c: { modules: ['c', 'ac', 'bc', 'abc'] },
+    }, [
+      {
+        output: 'ab',
+        filter: '+(a|b)',
+      },
+      {
+        output: 'ac',
+        filter: ['+(a|c)', '!ab'],
+      },
+      {
+        output: 'bc',
+        filter: ['+(b|c)', '!ab', '!ac'],
+      },
+      {
+        output: 'abc',
+        filter: '+(ab|bc|ac)',
+      },
+    ]),
+    {
+      a: {
+        modules: ['a'],
+        deps: ['abc', 'ab', 'ac'],
+      },
+      b: {
+        modules: ['b'],
+        deps: ['abc', 'ab', 'bc'],
+      },
+      c: {
+        modules: ['c'],
+        deps: ['abc', 'ac', 'bc'],
+      },
+      ab: { modules: ['ab'], deps: ['abc'] },
+      bc: { modules: ['bc'], deps: ['abc'] },
+      ac: { modules: ['ac'], deps: ['abc'] },
+      abc: { modules: ['abc'] },
+    },
+    'common of commons'
   )
 
   t.end()

@@ -9,35 +9,34 @@ const vinylify = require('./lib/vinylify')
 module.exports = function (b, opts) {
   opts = opts || {}
 
-  let basedir = opts.basedir || b._options.basedir || process.cwd()
-  let needRecords = !opts.groups
-  let packOpts = Object.assign({}, b._options, {
+  var basedir = opts.basedir || b._options.basedir || process.cwd()
+  var packOpts = Object.assign({}, b._options, {
     raw: true,
     hasExports: true,
   })
-  let packer = opts.pack || pack
-  let groups = opts.groups || []
+  var packer = opts.pack || pack
+  var input = []
 
   function write(row, _, next) {
-    if (row.file && needRecords) {
-      groups.push(row.file)
+    if (row.file) {
+      input.push(row.file)
     }
     next(null, row)
   }
 
   function end(done) {
-    let noop = function () {}
-    let output = through.obj(noop, noop)
+    var noop = function () {}
+    var output = through.obj(noop, noop)
 
-    let vinylStream = vinylify({
+    var vinylStream = vinylify({
       basedir: basedir,
-      groupFilter: groups,
+      groupFilter: opts.groups || input,
       common: opts.common,
       pack: function (bundleID) {
-        let options = Object.assign(
+        var options = Object.assign(
           {}, packOpts, { to: path.resolve(basedir, bundleID) }
         )
-        let pipeline = splicer.obj([
+        var pipeline = splicer.obj([
           'pack', [ packer(options) ],
           'wrap', [],
         ])
@@ -47,27 +46,30 @@ module.exports = function (b, opts) {
       },
     })
 
-    let map = {}
-    vinylStream.on('output', function (id, file) {
-      map[id] = map[id] || {}
-      map[id].modules = map[id].modules || []
-      map[id].modules.push(path.relative(basedir, file))
+    var inputFiles = input.map(file => path.relative(basedir, file))
+    vinylStream.once('map', function (bundleMap) {
+      var inputMap = inputFiles.reduce(function (o, file) {
+        o[file] = []
+        return o
+      }, Object.create(null))
+      for (let bundle in bundleMap) {
+        let modules = bundleMap[bundle].modules
+        modules = Object.keys(modules).map(id => path.relative(basedir, modules[id]))
+        bundleMap[bundle].modules = modules
+        let moduleMap = modules.reduce(function (o, file) {
+          o[file] = true
+          return o
+        }, Object.create(null))
+        inputFiles.forEach(function (file) {
+          if (moduleMap[file]) {
+            inputMap[file].push(bundle)
+          }
+        })
+      }
+      b.emit('common.map', bundleMap, inputMap)
     })
-    vinylStream.once('common', function (bundle2common) {
-      bundle2common.forEach(function (commons, id) {
-        map[id] = map[id] || {}
-        map[id].deps = []
-        for (let i of commons) {
-          map[id].deps.push(i)
-        }
-      })
-    })
-
     vinylStream.on('data', file => output.push(file))
-    vinylStream.once('end', function () {
-      output.push(null)
-      b.emit('common.map', map)
-    })
+    vinylStream.once('end', () => output.push(null))
 
     b.pipeline.get('pack').unshift(
       through.obj(function (row, _, next) {
@@ -80,22 +82,15 @@ module.exports = function (b, opts) {
     )
     b.pipeline.push(output)
 
-    if (needRecords) {
-      groups = []
-    }
-
     done()
   }
 
-  function hookPipeline() {
-    b.pipeline.get('record').push(
-      through.obj(write, end)
-    )
+  function hook() {
+    input = []
+    b.pipeline.get('record').push(through.obj(write, end))
   }
 
-  b.on('reset', hookPipeline)
-  hookPipeline()
-
-  return b
+  b.on('reset', hook)
+  hook()
 }
 

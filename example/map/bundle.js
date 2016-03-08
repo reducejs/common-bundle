@@ -16,16 +16,7 @@ const build = path.resolve(__dirname, 'build')
 
 b.plugin(require('../..'), {
   groups: 'page/**/index.js',
-  common: [
-    {
-      output: 'common-red-and-green.js',
-      filter: ['page/red/index.js', 'page/green/index.js'],
-    },
-    {
-      output: 'common-hello-and-hi.js',
-      filter: ['page/hi/index.js', 'page/hello/index.js'],
-    },
-  ],
+  common: 'common.js',
 })
 
 del.sync(build)
