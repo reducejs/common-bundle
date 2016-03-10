@@ -1,4 +1,10 @@
-<!-- 7be0f64 1457441745000 -->
+<!-- a8b9c9a 1457591151000 -->
+
+## [v0.4.1](https://github.com/reducejs/common-bundle/commit/a8b9c9a) (2016-03-10)
+
+* [[`ea82a94`](https://github.com/reducejs/common-bundle/commit/ea82a94)] Fix: inputMap bundles should also include deps
+
+* [[`3b6c1e4`](https://github.com/reducejs/common-bundle/commit/3b6c1e4)] changelog
 
 ## [v0.4.0](https://github.com/reducejs/common-bundle/commit/7be0f64) (2016-03-08)
 
