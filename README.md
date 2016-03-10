@@ -383,18 +383,18 @@ b.on('common.map', function (bundleMap, inputMap) {
 {
   // bundle => {}
   "page/hi/index.js": {
+    // modules in this bundle
     "modules": [
-      // modules in this bundle
-      "page/hi/index.js"
+      "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/page/hi/index.js"
     ],
+    // bundles should come before this bundle
     "deps": [
-      // bundles should come before this bundle
       "common.js"
     ]
   },
   "page/hello/index.js": {
     "modules": [
-      "page/hello/index.js"
+      "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/page/hello/index.js"
     ],
     "deps": [
       "common.js"
@@ -402,8 +402,8 @@ b.on('common.map', function (bundleMap, inputMap) {
   },
   "common.js": {
     "modules": [
-      "node_modules/lodash/index.js",
-      "web_modules/say/index.js"
+      "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/node_modules/lodash/index.js",
+      "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/web_modules/say/index.js"
     ]
   }
 }
@@ -414,11 +414,13 @@ b.on('common.map', function (bundleMap, inputMap) {
 
 ```js
 {
-  // input file => [bundles]
-  "page/hello/index.js": [
+  // input file => [bundles should be loaded to use `input`]
+  "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/page/hello/index.js": [
+    "common.js",
     "page/hello/index.js"
   ],
-  "page/hi/index.js": [
+  "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/page/hi/index.js": [
+    "common.js",
     "page/hi/index.js"
   ]
 }

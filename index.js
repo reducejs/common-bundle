@@ -46,26 +46,32 @@ module.exports = function (b, opts) {
       },
     })
 
-    var inputFiles = input.map(file => path.relative(basedir, file))
+    var inputFiles = input
     vinylStream.once('map', function (bundleMap) {
       var inputMap = inputFiles.reduce(function (o, file) {
-        o[file] = []
+        o[file] = new Set()
         return o
       }, Object.create(null))
       for (let bundle in bundleMap) {
-        let modules = bundleMap[bundle].modules
-        modules = Object.keys(modules).map(id => path.relative(basedir, modules[id]))
-        bundleMap[bundle].modules = modules
+        let modules = values(bundleMap[bundle].modules)
         let moduleMap = modules.reduce(function (o, file) {
           o[file] = true
           return o
         }, Object.create(null))
         inputFiles.forEach(function (file) {
           if (moduleMap[file]) {
-            inputMap[file].push(bundle)
+            [].concat(bundleMap[bundle].deps, bundle)
+              .filter(Boolean)
+              .forEach(i => inputMap[file].add(i))
           }
         })
+        bundleMap[bundle].modules = modules
       }
+      Object.keys(inputMap).forEach(function (k) {
+        var bundles = inputMap[k]
+        inputMap[k] = []
+        bundles.forEach(x => inputMap[k].push(x))
+      })
       b.emit('common.map', bundleMap, inputMap)
     })
     vinylStream.on('data', file => output.push(file))
@@ -92,5 +98,9 @@ module.exports = function (b, opts) {
 
   b.on('reset', hook)
   hook()
+}
+
+function values(o) {
+  return Object.keys(o).map(k => o[k])
 }
 

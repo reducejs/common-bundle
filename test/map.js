@@ -5,10 +5,10 @@ const commonify = require('..')
 const test = require('tap').test
 const browserify = require('browserify')
 
-const fixtures = path.resolve.bind(path, __dirname, 'fixtures')
+const fixtures = path.resolve.bind(path, __dirname, 'fixtures', 'src')
 
 test('map', function(t) {
-  var b = browserify(['./a.js', './b.js'], { basedir: fixtures('src') })
+  var b = browserify(['./a.js', './b.js'], { basedir: fixtures() })
   b.plugin(commonify, {
     groups: ['a.js', 'b.js'],
     common: {
@@ -19,21 +19,21 @@ test('map', function(t) {
   b.on('common.map', function (bundleMap, inputMap) {
     t.same(bundleMap, {
       'a.js': {
-        modules: ['a.js'],
+        modules: [fixtures('a.js')],
         deps: ['common.js'],
       },
       'b.js': {
-        modules: ['b.js'],
+        modules: [fixtures('b.js')],
         deps: ['common.js'],
       },
       'common.js': {
-        modules: ['c.js'],
+        modules: [fixtures('c.js')],
       },
     })
 
     t.same(inputMap, {
-      'a.js': ['a.js'],
-      'b.js': ['b.js'],
+      [fixtures('a.js')]: ['common.js', 'a.js'],
+      [fixtures('b.js')]: ['common.js', 'b.js'],
     })
 
     t.end()
