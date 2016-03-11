@@ -1,12 +1,10 @@
-'use strict'
-
-const through = require('../lib/through')
-const test = require('tap').test
-const reverse = require('reversepoint')
-const splicer = require('labeled-stream-splicer')
-const concat = require('concat-stream')
-const createStream = require('../lib/vinylify')
-const ROWS = [
+var through = require('../lib/through')
+var test = require('tap').test
+var reverse = require('reversepoint')
+var splicer = require('labeled-stream-splicer')
+var concat = require('concat-stream')
+var createStream = require('../lib/vinylify')
+var ROWS = [
   {
     file: '/path/to/src/page/A/index.css',
     id: '/path/to/src/page/A/index.css',

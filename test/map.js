@@ -1,11 +1,8 @@
-'use strict'
-
-const path = require('path')
-const commonify = require('..')
-const test = require('tap').test
-const browserify = require('browserify')
-
-const fixtures = path.resolve.bind(path, __dirname, 'fixtures', 'src')
+var path = require('path')
+var commonify = require('..')
+var test = require('tap').test
+var browserify = require('browserify')
+var fixtures = path.resolve.bind(path, __dirname, 'fixtures', 'src')
 
 test('map', function(t) {
   var b = browserify(['./a.js', './b.js'], { basedir: fixtures() })
@@ -31,10 +28,8 @@ test('map', function(t) {
       },
     })
 
-    t.same(inputMap, {
-      [fixtures('a.js')]: ['common.js', 'a.js'],
-      [fixtures('b.js')]: ['common.js', 'b.js'],
-    })
+    t.same(inputMap[fixtures('a.js')], ['common.js', 'a.js'])
+    t.same(inputMap[fixtures('b.js')], ['common.js', 'b.js'])
 
     t.end()
   })

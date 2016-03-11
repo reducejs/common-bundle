@@ -1,16 +1,15 @@
-'use strict'
-
-const path = require('path')
-const through = require('./lib/through')
-const pack = require('browser-pack')
-const splicer = require('labeled-stream-splicer')
-const vinylify = require('./lib/vinylify')
+var path = require('path')
+var through = require('./lib/through')
+var pack = require('browser-pack')
+var splicer = require('labeled-stream-splicer')
+var vinylify = require('./lib/vinylify')
+var mixy = require('mixy')
 
 module.exports = function (b, opts) {
   opts = opts || {}
 
   var basedir = opts.basedir || b._options.basedir || process.cwd()
-  var packOpts = Object.assign({}, b._options, {
+  var packOpts = mixy.mix({}, b._options, {
     raw: true,
     hasExports: true,
   })
@@ -33,7 +32,7 @@ module.exports = function (b, opts) {
       groupFilter: opts.groups || input,
       common: opts.common,
       pack: function (bundleID) {
-        var options = Object.assign(
+        var options = mixy.mix(
           {}, packOpts, { to: path.resolve(basedir, bundleID) }
         )
         var pipeline = splicer.obj([
@@ -52,30 +51,37 @@ module.exports = function (b, opts) {
         o[file] = new Set()
         return o
       }, Object.create(null))
-      for (let bundle in bundleMap) {
-        let modules = values(bundleMap[bundle].modules)
-        let moduleMap = modules.reduce(function (o, file) {
-          o[file] = true
-          return o
-        }, Object.create(null))
+
+      Object.keys(bundleMap).forEach(function (bundle) {
+        var modules = values(bundleMap[bundle].modules)
+        var moduleMap = toMap(modules)
         inputFiles.forEach(function (file) {
           if (moduleMap[file]) {
             [].concat(bundleMap[bundle].deps, bundle)
               .filter(Boolean)
-              .forEach(i => inputMap[file].add(i))
+              .forEach(function (i) {
+                inputMap[file].add(i)
+              })
           }
         })
         bundleMap[bundle].modules = modules
-      }
+      })
+
       Object.keys(inputMap).forEach(function (k) {
         var bundles = inputMap[k]
         inputMap[k] = []
-        bundles.forEach(x => inputMap[k].push(x))
+        bundles.forEach(function (x) {
+          inputMap[k].push(x)
+        })
       })
       b.emit('common.map', bundleMap, inputMap)
     })
-    vinylStream.on('data', file => output.push(file))
-    vinylStream.once('end', () => output.push(null))
+    vinylStream.on('data', function (file) {
+      output.push(file)
+    })
+    vinylStream.once('end', function () {
+      output.push(null)
+    })
 
     b.pipeline.get('pack').unshift(
       through.obj(function (row, _, next) {
@@ -101,6 +107,12 @@ module.exports = function (b, opts) {
 }
 
 function values(o) {
-  return Object.keys(o).map(k => o[k])
+  return Object.keys(o).map(function (k) { return o[k] })
 }
 
+function toMap(arr) {
+  return arr.reduce(function (o, k) {
+    o[k] = true
+    return o
+  }, Object.create(null))
+}
