@@ -1,4 +1,12 @@
-<!-- a8b9c9a 1457591151000 -->
+<!-- 29f79ca 1457670283000 -->
+
+## [v0.4.2](https://github.com/reducejs/common-bundle/commit/29f79ca) (2016-03-11)
+
+* [[`1cf770a`](https://github.com/reducejs/common-bundle/commit/1cf770a)] package.json: engines
+
+* [[`309c7fa`](https://github.com/reducejs/common-bundle/commit/309c7fa)] node: support 0.12.x
+
+* [[`665ae2f`](https://github.com/reducejs/common-bundle/commit/665ae2f)] changelog
 
 ## [v0.4.1](https://github.com/reducejs/common-bundle/commit/a8b9c9a) (2016-03-10)
 
