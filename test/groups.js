@@ -1,8 +1,6 @@
-'use strict'
-
-const test = require('tap').test
-const Groups = require('../lib/groups')
-const through = require('../lib/through')
+var test = require('tap').test
+var Groups = require('../lib/groups')
+var through = require('../lib/through')
 
 test('resolveGlob', function (t) {
   var basedir = '/path/to/src'
@@ -43,13 +41,13 @@ test('createFilter', function (t) {
   )
 
   t.equal(
-    Groups.createFilter(s => s + '/index.js', basedir)('/path/to/src/page/A'),
+    Groups.createFilter(function (s) { return s + '/index.js' }, basedir)('/path/to/src/page/A'),
     'page/A/index.js',
     'function, return absolute path'
   )
 
   t.equal(
-    Groups.createFilter(() => null, basedir)('/path/to/src/page/A'),
+    Groups.createFilter(function () { return null }, basedir)('/path/to/src/page/A'),
     undefined,
     'function, return undefined'
   )
@@ -57,7 +55,7 @@ test('createFilter', function (t) {
   t.equal(
     Groups.createFilter(
       {
-        output: () => 'page/A/index.js',
+        output: function () { return 'page/A/index.js' },
       },
       basedir
     )('/path/to/src/page/A'),
@@ -96,7 +94,7 @@ test('createFilter', function (t) {
   )
 
   t.equal(
-    Groups.createFilter({ filter: () => true }, basedir)('/path/to/src/page/B/index.js'),
+    Groups.createFilter({ filter: function () { return true } }, basedir)('/path/to/src/page/B/index.js'),
     'page/B/index.js',
     'filter, function'
   )
@@ -106,7 +104,7 @@ test('createFilter', function (t) {
 
 test('groupFilter.entries', function(tt) {
   function run(filter, t) {
-    let groups = new Groups({
+    var groups = new Groups({
       basedir: '/path/to/src',
       groupFilter: filter,
     })
@@ -158,7 +156,7 @@ test('groupFilter.entries', function(tt) {
 
 test('groupFilter.output', function(tt) {
   function run(filter, t) {
-    let groups = new Groups({
+    var groups = new Groups({
       basedir: '/path/to/src',
       groupFilter: filter,
     })
@@ -206,7 +204,7 @@ test('groupFilter.output', function(tt) {
 })
 
 test('groupFilter.one2multiple', function(t) {
-  let groupsStream = new Groups({
+  var groupsStream = new Groups({
     basedir: '/path/to/src',
     groupFilter: [
       'page/**/index.js',
@@ -248,7 +246,7 @@ test('groupFilter.one2multiple', function(t) {
 })
 
 test('stray modules', function(t) {
-  let groupsStream = new Groups({
+  var groupsStream = new Groups({
     basedir: '/path/to/src',
     groupFilter: [
       {
@@ -292,12 +290,12 @@ test('stray modules', function(t) {
     file: '/path/to/node_modules/E/index.js',
   })
   source()
-    .on('data', row => groupsStream.write(row))
-    .on('end', () => groupsStream.end())
+    .on('data', function (row) { groupsStream.write(row) })
+    .on('end', function () { groupsStream.end() })
 })
 
 function source() {
-  let ret = through.obj()
+  var ret = through.obj()
   ret.write({
     id: '/path/to/src/page/A/index.js',
     file: '/path/to/src/page/A/index.js',

@@ -1,16 +1,13 @@
-'use strict'
-
-const fs = require('fs')
-const del = require('del')
-const path = require('path')
-const commonify = require('..')
-const vfs = require('vinyl-fs')
-const test = require('tap').test
-const browserify = require('browserify')
-const run = require('callback-sequence').run
-
-const fixtures = path.resolve.bind(path, __dirname, 'fixtures')
-const build = fixtures('build')
+var fs = require('fs')
+var del = require('del')
+var path = require('path')
+var commonify = require('..')
+var vfs = require('vinyl-fs')
+var test = require('tap').test
+var browserify = require('browserify')
+var run = require('callback-sequence').run
+var fixtures = path.resolve.bind(path, __dirname, 'fixtures')
+var build = fixtures('build')
 
 test('multiple', function(t) {
   return run([

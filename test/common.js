@@ -1,7 +1,5 @@
-'use strict'
-
-const test = require('tap').test
-const util = require('../lib/common')
+var test = require('tap').test
+var util = require('../lib/common')
 
 test('intersection', function (t) {
   t.same(
