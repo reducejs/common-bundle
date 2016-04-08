@@ -31,13 +31,14 @@ var entries = glob.sync('page/**/index.js', { cwd: basedir })
 var b = browserify(entries, { basedir: basedir })
  
 b.plugin('common-bundle', {
-  // Pack each index.js and their dependencies into one bundle
-  // (with a path like page/**/index.js)
+  // Pack each index.js and their dependencies into a new bundle
+  // e.g. '/path/to/src/page/hi/index.js' => 'page/hi/index.js'
   groups: 'page/**/index.js',
 })
  
 var vfs = require('vinyl-fs')
 // Write all bundles to the build directory
+// e.g. 'page/hi/index.js' => '/path/to/build/page/hi/index.js'
 b.bundle().pipe(vfs.dest('/path/to/build'))
 
 ```
@@ -57,13 +58,17 @@ var entries = glob.sync('page/**/index.js', { cwd: basedir })
 var b = browserify(entries, { basedir: basedir })
  
 b.plugin('common-bundle', {
+  // Pack each index.js and their dependencies into a new bundle
+  // e.g. '/path/to/src/page/hi/index.js' => 'page/hi/index.js'
   groups: 'page/**/index.js',
 
   common: {
-    // create a common bundle for all bundles
-    // whose path matches **/*.js
+    // create a common bundle for bundles
+    // whose path matches 'page/**/index.js'
+    // e.g. 'page/hi/index.js', 'page/hello/index.js',
+    // 'page/red/index.js', 'page/green/index.js'
     output: 'common.js',
-    filter: '**/*.js',
+    filter: 'page/**/index.js',
   },
 })
  
@@ -118,62 +123,58 @@ b.bundle().pipe(vfs.dest('/path/to/build'))
 
 ![multiple-commons](example/images/multiple-commons.png)
 
-## Usage
+## options
 
-```javascript
-var browserify = require('browserify')
+* [groups](#groups)
+* [common](#common)
 
-var b = browserify(entries, bopts)
+### groups
+Groups entries (with their dependencies) together
+and create a new bundle for each group.
 
-b.plugin('common-bundle', options)
+Types of possible values:
+* `Object`. [`groups.output`](#groupsoutput), [`groups.filter`](#groupsfilter)
+* `String`. Equivalent to `{ filter: groups }`.
+* `Function`. Equivalent to `{ output: groups }`.
+* `Array`. Elements are treated as a `groups` option and processed one by one.
 
-```
+#### groups.output
+Specify paths to new bundles.
 
-### options
+**Type**: `String`
 
-#### groups
-Specify some entries and create a bundle for containing them and their dependencies.
-
-##### typeof options.groups === 'object'
-
-* `options.groups.output`
-
-Specify the path to the new bundle
-
-Type: `String`
-
-`output` should be a path relative to the final build directory.
+Should be a path relative to the final build directory.
 
 ```js
 {
-  // entries with a pattern like page/**/index.js will be packed into bundle.js
+  // entries like 'page/**/index.js' will be packed into bundle.js
   output: 'bundle.js',
   filter: 'page/**/index.js',
 }
 
 ```
 
-Type: `Function`
+**Type**: `Function`
 
-`filter` is ignored.
-`output` will be called with each module file path,
+`groups.filter` is ignored.
+`groups.output` will be called with each module file path,
 and the returned value (if there is any) is used as the file path to the new bundle.
 
 ```js
 {
   output: function (file) {
-    if (file.endsWith('/page/A/index.js')) {
-      return 'page/A/index.js'
+    if (file.endsWith('/page/hi/index.js')) {
+      return 'page/hi/index.js'
     }
-    if (file.endsWith('/page/B/index.js')) {
-      return 'page/B/index.js'
+    if (file.endsWith('/page/hello/index.js')) {
+      return 'page/hello/index.js'
     }
   },
 }
 
 ```
 
-Type: `Falsy`
+**Type**: `Falsy`
 
 If `options.groups.filter` says that the given module should go to a new bundle,
 `path.relative(basedir, moduleFile)` is used as the file path to the new bundle.
