@@ -414,6 +414,24 @@ test('create', function (t) {
   t.same(
     util.create({
       a: { modules: ['a', 'c'] },
+      b: { modules: ['b'] },
+    }, {
+      output: 'c',
+      threshold: function (file) {
+        return file === 'c'
+      },
+    }),
+    {
+      a: { modules: ['a'], deps: ['c'] },
+      b: { modules: ['b'], deps: ['c'] },
+      c: { modules: ['c'] },
+    },
+    'threshold'
+  )
+
+  t.same(
+    util.create({
+      a: { modules: ['a', 'c'] },
       b: { modules: ['b', 'c'] },
     }, {
       output: 'a',
