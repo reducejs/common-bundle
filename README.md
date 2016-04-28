@@ -276,75 +276,46 @@ where `commonBundle` is `String`.
 #### Multiple common options
 `b.plugin('common-bundle', { common: arr })`, where `arr` is `Array`.
 
+Actually, the common option is used to set the dependency relationship between bundles.
+If bundle `a.js` is declared to depend on `b.js`,
+modules in `b.js` should not be included in `a.js`,
+because 'depend' means that `b.js` should be loaded before `a.js`, so no need to load them again from `a.js`.
+However, if `b.js` does not exist yet,
+it should be created and contain the common modules shared by its dependents in the current configure.
+
 Each element is treated as an `options.common` and processed one by one to create new bundles.
 
-```javascript
-b.plugin('common-bundle', {
-  // create original page-specific bundles
-  // with path `page/**/index.js` for each page A, B, C, D
-  groups: 'page/**/index.js',
-  common: [
-    {
-      // new common bundle
-      output: 'ab.js',
-      // match against the four page-specific bundles
-      filter: ['page/A/index.js', 'page/B/index.js'],
-    },
-    {
-      // new common bundle
-      output: 'cd.js',
-      // match against the four page-specific bundles and `ab.js`
-      filter: ['page/C/index.js', 'page/D/index.js'],
-    },
-    {
-      // new common bundle
-      output: 'common.js',
-      // match against the four page-specific bundles,
-      // `ab.js`, and `cd.js`
-      filter: ['ab.js', 'cd.js'],
-    },
-  ],
-})
-
-```
-
-The first configuration is processed the way above
-to create a new common bundle.
-
-However, when processing the second,
-its `filter` will match against all the known bundles,
-including the original bundles
-and the common bundle created from the first configuration.
-
-The same thing happens for the third configuration,
-and so on and on.
-
-Thus, common of common bundles could be possible,
-like `common.js` in the example above.
-
-What if two configurations share the same `output`?
-
 ```js
-b.plugin('common-bundle', {
-  groups: 'page/**/index.js',
+{
   common: [
+    // Declare that both a.js and b.js should depend on common.js
+    // As common.js does not exist, it is created to contain modules shared
+   // by both a.js and b.js
     {
       output: 'common.js',
-      filter: ['page/A/index.js', 'page/B/index.js'],
+      filter: ['a.js', 'b.js']
     },
+
+    // Declare that a.js and c.js should depend on common.js
+    // As common.js already exists, no extra bundle need to be created
+    // But modules in c.js are removed if they are also in common.js
+    // Since a.js has already been declared to depend on common.js in the previous
+    // configure, nothing will happen to it here
+    // In a word, this configure will NOT modify the contents of common.js
+    // It only removes some modules from c.js
     {
-      output: 'minor.js',
-      filter: ['page/**/index.js', '!page/A/index.js', '!page/B/index.js'],
-    },
-    {
-      // common.js has already been created
       output: 'common.js',
-      // nothing happens to common.js
-      // but modules in minor.js are removed if they are also in common.js
-      filter: 'minor.js',
+      filter: ['a.js', 'c.js']
     },
-  ],
-})
+
+    // declare that b.js and c.js should depend on common.js
+    // they already does, so nothing happens
+    {
+      output: 'common.js',
+      filter: ['b.js', 'c.js']
+    }
+  ]
+}
 
 ```
 
