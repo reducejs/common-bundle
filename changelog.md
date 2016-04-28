@@ -1,4 +1,12 @@
-<!-- 36d912b 1461833869000 -->
+<!-- 7d003d8 1461834622000 -->
+
+## [v0.4.4](https://github.com/reducejs/common-bundle/commit/7d003d8) (2016-04-28)
+
+* [[`ed2444c`](https://github.com/reducejs/common-bundle/commit/ed2444c)] Readme: fix description for threshold
+
+* [[`f12d2d4`](https://github.com/reducejs/common-bundle/commit/f12d2d4)] readme
+
+* [[`f8ec4fe`](https://github.com/reducejs/common-bundle/commit/f8ec4fe)] changelog
 
 ## [v0.4.3](https://github.com/reducejs/common-bundle/commit/36d912b) (2016-04-28)
 
