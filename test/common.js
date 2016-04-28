@@ -24,7 +24,7 @@ test('intersection', function (t) {
 
   t.same(
     util.intersection([ [1, 2, 3], [2, 1], [1] ], function (f) {
-      return f == 2
+      return f === 2
     }), [2], 'function threshold'
   )
 
