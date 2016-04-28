@@ -188,7 +188,7 @@ If `true` returned, that module will be packed into a new bundle.
 #### Sugar cases for the groups option
 * `b.plugin('common-bundle', { groups: pattern })` is equivalent to 
 `b.plugin('common-bundle', { groups: { filter: pattern } })`,
-where `pattern` is `String`.
+where `pattern` is `String` or `Array`.
 
 * `b.plugin('common-bundle', { groups: fn })` is equivalent to 
 `b.plugin('common-bundle', { groups: { output: fn } })`,
@@ -265,6 +265,13 @@ This is the default case, and the default value is the aount of all the sharing 
 * `Function`.
 Signature: `threshold(file, numberOfRequiringBundles)`.
 If `true` returned, `file` will go to the common bundle.
+
+#### Sugar cases for the common option
+
+* `b.plugin('common-bundle', { common: commonBundle })` is equivalent to
+`b.plugin('common-bundle', { common: { output: commonBundle } })`,
+where `commonBundle` is `String`.
+
 
 #### Multiple common options
 `b.plugin('common-bundle', { common: arr })`, where `arr` is `Array`.
