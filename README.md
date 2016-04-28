@@ -141,10 +141,8 @@ Types of possible values:
 #### groups.output
 Specify paths to new bundles.
 
-**Type**: `String`
-
+* `String`.
 Should be a path relative to the final build directory.
-
 ```js
 {
   // entries like 'page/**/index.js' will be packed into bundle.js
@@ -154,11 +152,9 @@ Should be a path relative to the final build directory.
 
 ```
 
-**Type**: `Function`
-
-`groups.filter` is ignored.
-`groups.output` will be called with each module file path,
-and the returned value (if there is any) is used as the file path to the new bundle.
+* `Function`.
+`groups.filter` will be ignored. Called with each module file path,
+and the returned value (if any) is used as the file path to the new bundle.
 
 ```js
 {
@@ -174,35 +170,31 @@ and the returned value (if there is any) is used as the file path to the new bun
 
 ```
 
-**Type**: `Falsy`
-
-If `options.groups.filter` says that the given module should go to a new bundle,
+* otherwise.
+If a new bundle should be created to contain the module matched by `groups.filter`,
 `path.relative(basedir, moduleFile)` is used as the file path to the new bundle.
 
-* `options.groups.filter`
-
+#### groups.filter
 Specify the the entries that should go to the new bundle
 
-Type: `String`, `Array`
-
+* `String`, `Array`.
 Passed to [`multimatch`] to test module files.
-
 Relative patterns will be resolved to absolute paths from [basedir](#basedir).
 
-Type: `Function`
-
+* `Function`.
 Called with each module file path.
-If `true` returned, that module will be packed into the new bundle.
+If `true` returned, that module will be packed into a new bundle.
 
-##### typeof options.groups === 'string'
-`b.plugin('common-bundle', { groups: pattern })` is equivalent to 
-`b.plugin('common-bundle', { groups: { filter: pattern } })`.
+#### Sugar cases for the groups option
+* `b.plugin('common-bundle', { groups: pattern })` is equivalent to 
+`b.plugin('common-bundle', { groups: { filter: pattern } })`,
+where `pattern` is `String` or `Array`.
 
-##### typeof options.groups === 'function'
-`b.plugin('common-bundle', { groups: fn })` is equivalent to 
-`b.plugin('common-bundle', { groups: { output: fn } })`.
+* `b.plugin('common-bundle', { groups: fn })` is equivalent to 
+`b.plugin('common-bundle', { groups: { output: fn } })`,
+where `fn` is `Function`.
 
-##### Array.isArray(options.groups) === true
+* `b.plugin('common-bundle', { groups: arr })`, where `arr` is `Array`.
 Each element is processed as a `groups` option.
 
 ```javascript
@@ -219,24 +211,16 @@ Each element is processed as a `groups` option.
 
 ```
 
-#### common
-After processing `options.groups`, some bundles have been created,
-which are called original bundles.
+### common
+After processing `options.groups`, some *original* bundles have been created.
 
 The original bundles (or some of them)
-may share a lot of common modules.
+may share some common modules.
 We can use `options.common` to create common bundles
-containing the shared modules,
+containing those shared modules,
 and remove them from the original bundles.
 
-**NOTE**
-If there is only one single original bundle,
-this option is ignored.
-
-##### typeof options.common === 'object'
-
-* `options.common.output`
-
+#### common.output
 Specify the file path to the new common bundle.
 
 Type: `String`
@@ -254,21 +238,17 @@ b.plugin('common-bundle', {
 
 ```
 
-* `options.common.filter`
+#### common.filter
+Specify which bundles to share the new common bundle.
 
-Specify which group of bundles should share the new common bundle.
-
-Type: `String`, `Array`
-
+* `String`, `Array`.
 Passed to [`multimatch`] to test bundle files.
 
-Type: `Function`
+* `Function`.
+Receives all the bundles created yet (including common bundles),
+and should return some of them.
 
-Receives all the bundles created yet,
-and should return an array of some of them.
-
-Type: *otherwise*
-
+* *otherwise*.
 The new common bundle is shared by all bundles created yet.
 
 ```js
@@ -276,8 +256,27 @@ b.plugin('common-bundle', { common: 'common.js' })
 
 ```
 
-##### Array.isArray(options.common) === true
-Each element is treated as an `options.common` to create bundles.
+#### common.threshold
+Specify which modules to go to the common bundle.
+
+* `Number`.
+Modules required by more than the specified amount of bundles go to the common bundle.
+This is the default case, and the default value is the aount of all the sharing bundles.
+* `Function`.
+Signature: `threshold(file, numberOfRequiringBundles)`.
+If `true` returned, `file` will go to the common bundle.
+
+#### Sugar cases for the common option
+
+* `b.plugin('common-bundle', { common: commonBundle })` is equivalent to
+`b.plugin('common-bundle', { common: { output: commonBundle } })`,
+where `commonBundle` is `String`.
+
+
+#### Multiple common options
+`b.plugin('common-bundle', { common: arr })`, where `arr` is `Array`.
+
+Each element is treated as an `options.common` and processed one by one to create new bundles.
 
 ```javascript
 b.plugin('common-bundle', {
@@ -349,16 +348,16 @@ b.plugin('common-bundle', {
 
 ```
 
-#### basedir
+### basedir
 Specify the base for relative paths to bundles and module files.
 
 Type: `String`
 
 Default: `b._options.basedir`
 
-### Events
+## Events
 
-#### b.on('common.map', (bundleMap, inputMap) => {})
+### b.on('common.map', (bundleMap, inputMap) => {})
 
 Suppose there are two pages, `hi` and `hello`,
 and both depend upon `lodash` and `say`.
@@ -428,7 +427,7 @@ b.on('common.map', function (bundleMap, inputMap) {
 
 ```
 
-#### b.on('common.pipeline', (id, pipeline) => {})
+### b.on('common.pipeline', (id, pipeline) => {})
 
 Every time a bundle created, a `common.pipeline` event is emitted with its `id` and the packing `pipeline`.
 
