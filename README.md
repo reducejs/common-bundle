@@ -260,8 +260,9 @@ b.plugin('common-bundle', { common: 'common.js' })
 Specify which modules to go to the common bundle.
 
 * `Number`.
-Modules required by more than the specified amount of bundles go to the common bundle.
+Modules required by the specified amount (or more) of bundles should go to the common bundle.
 This is the default case, and the default value is the aount of all the sharing bundles.
+
 * `Function`.
 Signature: `threshold(file, numberOfRequiringBundles)`.
 If `true` returned, `file` will go to the common bundle.
