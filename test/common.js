@@ -7,15 +7,25 @@ test('intersection', function (t) {
   )
 
   t.same(
-    util.intersection([1]), [1], 'single array'
+    util.intersection([ [1] ]), [], 'single element'
   )
 
   t.same(
-    util.intersection([1], [2]), [], 'no intersection'
+    util.intersection([ [1], [2] ]), [], 'no intersection'
   )
 
   t.same(
-    util.intersection([1], [2, 1], [1]), [1], 'intersection'
+    util.intersection([ [1], [2, 1], [1] ]), [1], 'intersection'
+  )
+
+  t.same(
+    util.intersection([ [1, 2, 3], [2, 1], [1] ], 2), [1, 2], 'numeric threshold'
+  )
+
+  t.same(
+    util.intersection([ [1, 2, 3], [2, 1], [1] ], function (f) {
+      return f == 2
+    }), [2], 'function threshold'
   )
 
   t.end()
