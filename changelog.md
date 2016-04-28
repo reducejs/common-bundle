@@ -1,4 +1,20 @@
-<!-- 29f79ca 1457670283000 -->
+<!-- 36d912b 1461833869000 -->
+
+## [v0.4.3](https://github.com/reducejs/common-bundle/commit/36d912b) (2016-04-28)
+
+* [[`ee19e99`](https://github.com/reducejs/common-bundle/commit/ee19e99)] Add test
+
+* [[`3073d8a`](https://github.com/reducejs/common-bundle/commit/3073d8a)] Add test
+
+* [[`2e1901c`](https://github.com/reducejs/common-bundle/commit/2e1901c)] readme
+
+* [[`27eee58`](https://github.com/reducejs/common-bundle/commit/27eee58)] Make eslint happy
+
+* [[`58e9c3e`](https://github.com/reducejs/common-bundle/commit/58e9c3e)] Feature. Support options.common.threshold
+
+* [[`b9e25ff`](https://github.com/reducejs/common-bundle/commit/b9e25ff)] readme
+
+* [[`decae38`](https://github.com/reducejs/common-bundle/commit/decae38)] changelog
 
 ## [v0.4.2](https://github.com/reducejs/common-bundle/commit/29f79ca) (2016-03-11)
 
