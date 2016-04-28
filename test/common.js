@@ -23,6 +23,10 @@ test('intersection', function (t) {
   )
 
   t.same(
+    util.intersection([ [1, 2, 3], [2, 1], [1] ], 4), [], 'too big numeric threshold'
+  )
+
+  t.same(
     util.intersection([ [1, 2, 3], [2, 1], [1] ], function (f) {
       return f === 2
     }), [2], 'function threshold'
