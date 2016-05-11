@@ -15,16 +15,18 @@ const b = browserify(entries, {
   paths: [path.resolve(__dirname, 'src', 'web_modules')],
 })
 
-b.plugin(require('../..'), {
-  groups: 'page/**/index.js',
-  common: 'common.js',
+b.plugin('common-bundle', {
+  factor: {
+    groups: '**/page/**/index.js',
+    common: 'common.js',
+  },
 })
 
 b.plugin('watchify2', { entryGlob: 'page/**/index.js' })
 
 
+var build = path.resolve(__dirname, 'build')
 function bundle() {
-  let build = path.resolve(__dirname, 'build')
   b.on('common.map', m => { b._map = m })
   if (b._map) {
     let map = b._map
@@ -44,5 +46,6 @@ b.on('update', bundle)
 
 b.on('log', console.log.bind(console))
 
+del(build)
 bundle()
 

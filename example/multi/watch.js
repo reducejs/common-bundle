@@ -15,18 +15,15 @@ const b = browserify(entries, {
   paths: [path.resolve(__dirname, 'src', 'web_modules')],
 })
 
-b.plugin(require('../..'), {
-  groups: 'page/**/index.js',
-  common: [
-    {
-      output: 'common-red-and-green.js',
-      filter: ['page/red/index.js', 'page/green/index.js'],
-    },
-    {
-      output: 'common-hello-and-hi.js',
-      filter: ['page/hi/index.js', 'page/hello/index.js'],
-    },
-  ],
+b.plugin('common-bundle', {
+  factor: function (input) {
+    input.forEach(function (file) {
+      this.add(file, file)
+    }, this)
+    this.addCommon('common-red-and-green.js', ['page/red/index.js', 'page/green/index.js'])
+    this.addCommon('common-hello-and-hi.js', ['page/hi/index.js', 'page/hello/index.js'])
+    this.addCommon('common.js', 'common-*.js')
+  },
 })
 
 b.plugin('watchify2', { entryGlob: 'page/**/index.js' })

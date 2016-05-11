@@ -15,7 +15,7 @@ const b = browserify(entries, {
   paths: [path.resolve(__dirname, 'src', 'web_modules')],
 })
 
-b.plugin(require('../..'), {
+b.plugin('common-bundle', {
   groups: 'page/**/index.js',
   common: [
     {

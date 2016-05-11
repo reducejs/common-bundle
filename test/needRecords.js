@@ -17,9 +17,8 @@ test('needRecords', function(t) {
     function () {
       return browserify(['./a.js', './b.js'], { basedir: fixtures('src') })
         .plugin(commonify, {
-          common: {
-            filter: ['a.js', 'b.js'],
-            output: 'common.js',
+          factor: {
+            common: 'common.js',
           },
         })
         .bundle()

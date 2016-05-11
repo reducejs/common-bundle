@@ -14,9 +14,11 @@ const b = browserify(entries, {
 })
 const build = path.resolve(__dirname, 'build')
 
-b.plugin(require('../..'), {
-  groups: 'page/**/index.js',
-  common: 'common.js',
+b.plugin('common-bundle', {
+  factor: {
+    groups: '**/page/**/index.js',
+    common: 'common.js',
+  },
 })
 
 del.sync(build)

@@ -14,24 +14,22 @@ const b = browserify(entries, {
 })
 const build = path.resolve(__dirname, 'build')
 
-b.plugin(require('../..'), {
-  groups: 'page/**/index.js',
-  common: [
-    {
-      output: 'common-red-and-green.js',
-      filter: ['page/red/index.js', 'page/green/index.js'],
-    },
-    {
-      output: 'common-hello-and-hi.js',
-      filter: ['page/hi/index.js', 'page/hello/index.js'],
-    },
-  ],
+b.plugin('common-bundle', {
+  factor: function (input) {
+    input.forEach(function (file) {
+      this.add(file, file)
+    }, this)
+    this.addCommon('common-red-and-green.js', ['page/red/index.js', 'page/green/index.js'])
+    this.addCommon('common-hello-and-hi.js', ['page/hi/index.js', 'page/hello/index.js'])
+    this.addCommon('common.js', 'common-*.js')
+  },
 })
 
 del.sync(build)
-b.on('common.map', function (bundleMap, inputMap) {
+b.on('common.map', function (bundleMap, inputMap, fileMap) {
   console.log(JSON.stringify(bundleMap, null, 2))
   console.log(JSON.stringify(inputMap, null, 2))
+  console.log(JSON.stringify(fileMap, null, 2))
 })
 b.bundle().pipe(vfs.dest(build))
 
