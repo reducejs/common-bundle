@@ -7,7 +7,8 @@
     "browser-pack": "^6.0.1",
     "labeled-stream-splicer": "^2.0.0",
     "mixy": "^1.0.0",
-    "multimatch": "^2.1.0"
+    "multimatch": "^2.1.0",
+    "vinyl": "^1.1.1"
   },
   "devDependencies": {
     "browserify": "^13.0.0",
