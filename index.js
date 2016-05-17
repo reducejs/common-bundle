@@ -1,4 +1,3 @@
-var path = require('path')
 var mixy = require('mixy')
 var Transform = require('stream').Transform
 var splicer = require('labeled-stream-splicer')
