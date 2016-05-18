@@ -10,8 +10,7 @@ A [`browserify`] plugin for packing modules into common shared bundles.
 
 **Features**:
 
-* Group one or more entries (modules) together to create a bundle.
-* Extract common modules from bundles to create additional shared bundles.
+* Powerful control on creating bundles
 * `b.bundle()` generates a stream flowing [`vinyl`] file objects.
 
 ## Example

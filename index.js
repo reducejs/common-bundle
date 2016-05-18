@@ -100,12 +100,11 @@ function createBundleStream(opts, basedir, input) {
 }
 
 function through(write, end) {
-  var ret = Transform({ objectMode: true })
-  ret._transform = write || function (c, _, next) {
-    next(null, c)
-  }
-  ret._flush = end
-  return ret
+  return Transform({
+    objectMode: true,
+    transform: write,
+    flush: end,
+  })
 }
 
 function vinylify(opts) {

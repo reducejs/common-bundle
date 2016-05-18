@@ -46,6 +46,20 @@ test('default', function (t) {
   t.end()
 })
 
+test('string', function (t) {
+  var factory = createFactory()
+  custom('bundle.js').call(factory)
+  factory.end()
+
+  t.same(factory.getBundles(), [ 'bundle.js' ])
+  var bm = factory.getBundleMap()
+  t.same(
+    values(bm['bundle.js'].modules).sort(),
+    ['/lib/abc.js', '/page/a.js', '/page/b.js', '/page/c.js' ]
+  )
+  t.end()
+})
+
 test('function', function (t) {
   var factory = createFactory()
   custom(function () {
@@ -58,6 +72,34 @@ test('function', function (t) {
   t.same(
     values(bm['bundle.js'].modules).sort(),
     ['/lib/abc.js', '/page/a.js', '/page/b.js', '/page/c.js' ]
+  )
+  t.end()
+})
+
+test('object groups', function (t) {
+  var factory = createFactory()
+  custom({
+    groups: {
+      'a.js': '/page/a.js',
+      'b.js': '/page/b.js',
+      'c.js': '/page/c.js',
+    },
+  }).call(factory)
+  factory.end()
+
+  t.same(factory.getBundles(), [ 'a.js', 'b.js', 'c.js' ])
+  var bm = factory.getBundleMap()
+  t.same(
+    values(bm['a.js'].modules).sort(),
+    ['/lib/abc.js', '/page/a.js' ]
+  )
+  t.same(
+    values(bm['b.js'].modules).sort(),
+    ['/lib/abc.js', '/page/b.js' ]
+  )
+  t.same(
+    values(bm['c.js'].modules).sort(),
+    ['/lib/abc.js', '/page/c.js' ]
   )
   t.end()
 })

@@ -31,10 +31,5 @@ b.on('common.map', function (o) {
 
 var build = path.join(root, 'build')
 del.sync(build)
-b.bundle()
-  .pipe(vfs.dest(build))
-  .on('data', function () {
-    // Remeber to consume the vinyl stream
-  })
-
+b.bundle().pipe(vfs.dest(build))
 
