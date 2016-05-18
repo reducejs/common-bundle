@@ -1,6 +1,6 @@
 {
   "name": "common-bundle",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "description": "A browserify plugin for packing modules into common shared bundles.",
   "main": "index.js",
   "dependencies": {
