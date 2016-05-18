@@ -6,12 +6,12 @@
 [![devDependencies](https://david-dm.org/reducejs/common-bundle/dev-status.svg)](https://david-dm.org/reducejs/common-bundle#info=devDependencies)
 ![node](https://img.shields.io/node/v/common-bundle.svg)
 
-A [`browserify`] plugin for packing modules into common shared bundles.
+A [browserify] plugin for packing modules into common shared bundles.
 
 **Features**:
 
 * Powerful control on creating bundles
-* `b.bundle()` generates a stream flowing [`vinyl`] file objects.
+* `b.bundle()` generates a stream flowing [vinyl] file objects.
 
 ## Example
 
@@ -94,8 +94,8 @@ To specify paths (rather than the default) for the created bundles:
 ```js
 { 
   // two bundles will be created
-  // one is 'a.js', to hold the module 'a.js'
-  // the other is 'b.js', to hold the module 'b.js'
+  // one is 'bundle-a.js', to hold the module 'a.js'
+  // the other is 'bundle-b.js', to hold the module 'b.js'
   groups: { 
     'bundle-a.js': 'a.js',
     'bundle-b.js': 'b.js',
@@ -136,11 +136,14 @@ It is the same with:
 Refer to [multimatch] for more information about the pattern.
 
 `options.common` allow you to create a bundle for holding common modules shared by all other bundles.
+```js
 {
   // one bundle for each entry
   // an additional bundle for holding modules shared by all entry bundles
   common: 'common.js'
 }
+
+```
 
 
 ### manual control on the process of creating bundles
@@ -148,7 +151,7 @@ If `options` is specified as a function,
 it will be called as a method of the [`BundleFactory`](#bundlefactory).
 
 ```js
-// the function receives the original entries
+// receives the original entries
 function (entries) {
   entries.forEach(function (file) { 
     // create a new bundle
@@ -311,7 +314,8 @@ You can call `pipeline.get` with a label name to get a handle on a stream pipeli
 
 Event handlers must be attached *before* calling `b.plugin`.
 
-## Work with [`gulp`]
+## Work with [gulp]
+
 ```js
 var gulp = require('gulp')
 var browserify = require('browserify')
@@ -357,57 +361,8 @@ function createBundler() {
 
 ```
 
-## Work with [`gulp`]
-
-```javascript
-var gulp = require('gulp')
-var browserify = require('browserify')
-var del = require('del')
-var glob = require('globby')
-var path = require('path')
-
-gulp.task('build', function () {
-  del.sync('build')
-  return createBundler().bundle().pipe(gulp.dest('build'))
-})
-
-gulp.task('watch', function (cb) {
-  var b = createBundler()
-    .plugin('watchify2', { entryGlob: 'page/**/index.js' })
-    .on('close', cb)
-    .on('update', bundle)
-  function bundle() {
-    del.sync('build')
-    b.bundle().pipe(gulp.dest('build'))
-  }
-  bundle()
-})
-
-function createBundler() {
-  var basedir = path.resolve(__dirname, 'src')
-  var entries = glob.sync('page/**/index.js', { cwd: basedir })
-  var b = browserify(entries, { basedir: basedir })
-  b.plugin('common-bundle', {
-    groups: 'page/**/index.js',
-    common: 'common.js',
-  })
-  b.on('common.map', function (o) {
-    console.log(
-      'bundles:', Object.keys(o.bundles).length,
-      'modules:', Object.keys(o.modules).length,
-      'entries:', Object.keys(o.entries).length
-    )
-  })
-  return b
-}
-
-```
-
-[`browserify`]: https://github.com/substack/node-browserify
-[`factor-bundle`]: https://github.com/substack/factor-bundle
-[`vinyl`]: https://github.com/gulpjs/vinyl
-[`watchify`]: https://github.com/substack/watchify
-[`watchify2`]: https://github.com/reducejs/watchify2
-[`gulp`]: https://github.com/gulpjs/gulp
-[`multimatch`]: https://github.com/sindresorhus/multimatch
+[browserify]: https://github.com/substack/node-browserify
+[vinyl]: https://github.com/gulpjs/vinyl
+[gulp]: https://github.com/gulpjs/gulp
+[multimatch]: https://github.com/sindresorhus/multimatch
 
