@@ -64,7 +64,7 @@ test('function', function (t) {
 
 test('pattern', function (t) {
   var factory = createFactory()
-  custom('**/page/*.js').call(factory)
+  custom({ groups: '**/page/*.js' }).call(factory)
   factory.end()
 
   t.same(factory.getBundles(), [ '/page/a.js', '/page/b.js', '/page/c.js' ])

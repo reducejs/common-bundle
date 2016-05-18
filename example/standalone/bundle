@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+
+var del = require('del')
+var path = require('path')
+var browserify = require('browserify')
+var vfs = require('vinyl-fs')
+var glob = require('globby')
+
+var args = process.argv.slice(2)
+var i = args.indexOf('-c')
+if (i === -1) {
+  i = args.indexOf('--config')
+}
+
+var conf = 'config.js'
+if (i > -1) {
+  conf = args[i + 1] || conf
+}
+
+var target = args[0]
+target = target || 'inputs'
+var root = path.resolve(target)
+
+var options = require(path.join(root, conf))
+options.basedir = path.join(root, 'src')
+options.entries = glob.sync(options.entries, { cwd: options.basedir })
+var b = browserify(options)
+b.on('common.map', function (o) {
+  console.log(JSON.stringify(o, null, 2))
+})
+
+var build = path.join(root, 'build')
+del.sync(build)
+b.bundle()
+  .pipe(vfs.dest(build))
+  .on('data', function () {
+    // Remeber to consume the vinyl stream
+  })
+
+

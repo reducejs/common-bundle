@@ -2,7 +2,8 @@
   "name": "example",
   "version": "0.0.0",
   "dependencies": {
-    "glob": "^7.0.0",
+    "globby": "^4.0.0",
+    "gulp": "^3.9.1",
     "watchify2": "^0.1.0"
   }
 }

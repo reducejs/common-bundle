@@ -18,9 +18,9 @@ module.exports = function (b, opts) {
   opts = opts || {}
   if (typeof opts === 'string') {
     opts = {
-      factor: function () {
+      factor: function (inputs) {
         // single bundle
-        this.add(rawOpts, this.getBundles(), false)
+        this.add(rawOpts, inputs, false)
       },
     }
   } else if (typeof opts === 'function') {
@@ -155,34 +155,45 @@ function collectMaps(opts) {
 
   function end(next) {
     // input won't be ready until the first bundle arrives
-    // so we create inputMap here
-    var inputMap = input.reduce(function (o, file) {
-      o[file] = true
-      return o
-    }, {})
-    var bundleMap = {}
-    var fileMap = {}
+
+    // relative bundle file path => { modules: [moduleID], deps: [bundlePath] }
+    var bundleMap = Object.create(null)
+    // absolute file path => id
+    var idMap = Object.create(null)
+    // id => [bundlePath]
+    var moduleMap = Object.create(null)
+
     bundles.forEach(function (bundle) {
       var relFile = resolver.relative(bundle.file)
+      var deps = bundle.deps.map(resolver.relative)
       bundleMap[relFile] = {
         modules: bundle.modules.map(function (row) {
-          if (inputMap[row.file]) {
-            inputMap[row.file] = relFile
+          if (!moduleMap[row.id]) {
+            moduleMap[row.id] = {
+              file: resolver.relative(row.file),
+              bundles: [deps.concat(relFile)],
+            }
+          } else {
+            moduleMap[row.id].bundles.push(deps.concat(relFile))
           }
-          fileMap[row.id] = resolver.relative(row.file)
+          idMap[row.file] = row.id
           return row.id
         }),
-        deps: bundle.deps.map(resolver.relative),
+        deps: deps,
       }
       this.push(bundle)
     }, this)
 
-    var inputMapRes = {}
-    input.forEach(function (file) {
-      var b = inputMap[file]
-      inputMapRes[resolver.relative(file)] = bundleMap[b].deps.concat(b)
+    input = input.map(function (file) {
+      return idMap[file]
     })
-    this.emit('map', bundleMap, inputMapRes, fileMap)
+
+    this.emit('map', {
+      bundles: bundleMap,
+      modules: moduleMap,
+      entries: input,
+      basedir: basedir,
+    })
     next()
   }
 

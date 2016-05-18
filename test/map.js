@@ -12,41 +12,46 @@ test('map', function(t) {
       common: 'common.js',
     },
   })
-  b.on('common.map', function (bundleMap, inputMap, fileMap) {
-    var idMap = flip(fileMap)
-    var toID = function (file) {
-      return idMap[file]
+  b.on('common.map', function (o) {
+    var bundles = o.bundles
+    var inputs = o.entries
+    var modules = o.modules
+    var basedir = o.basedir
+
+    var expectedModules = {
+      'a.js': [ ['common.js', 'a.js'] ],
+      'b.js': [ ['common.js', 'b.js'] ],
+      'c.js': [ ['common.js'] ],
     }
-    t.same(bundleMap, {
+    var file2idMap = {}
+    for (var id in modules) {
+      t.same(modules[id].bundles, expectedModules[modules[id].file])
+      file2idMap[modules[id].file] = id
+    }
+
+    function file2id(file) {
+      return file2idMap[file]
+    }
+
+    t.same(bundles, {
       'a.js': {
-        modules: ['a.js'].map(toID),
+        modules: ['a.js'].map(file2id),
         deps: ['common.js'],
       },
       'b.js': {
-        modules: ['b.js'].map(toID),
+        modules: ['b.js'].map(file2id),
         deps: ['common.js'],
       },
       'common.js': {
-        modules: ['c.js'].map(toID),
+        modules: ['c.js'].map(file2id),
         deps: [],
       },
     })
 
-    t.same(inputMap, {
-      'a.js': ['common.js', 'a.js'],
-      'b.js': ['common.js', 'b.js'],
-    })
-
+    t.same(inputs, ['a.js', 'b.js'].map(file2id))
+    t.same(basedir, fixtures())
     t.end()
   })
   b.bundle()
 })
-
-function flip(o) {
-  var res = {}
-  for (var k in o) {
-    res[o[k]] = k
-  }
-  return res
-}
 
