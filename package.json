@@ -5,26 +5,18 @@
   "main": "index.js",
   "dependencies": {
     "browser-pack": "^6.0.1",
-    "deps-topo-sort2": "^1.0.0",
-    "duplexer2": "^0.1.4",
     "labeled-stream-splicer": "^2.0.0",
-    "merge-stream": "^1.0.0",
     "mixy": "^1.0.0",
     "multimatch": "^2.1.0",
-    "reversepoint": "^0.2.1",
-    "stream-combiner2": "^1.1.1",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl": "^1.1.1"
   },
   "devDependencies": {
     "browserify": "^13.0.0",
     "callback-sequence": "^3.2.0",
-    "concat-stream": "^1.5.1",
     "del": "^2.2.0",
     "eslint": "^2.1.0",
-    "glob": "^7.0.0",
     "tap": "^5.0.0",
-    "vinyl-fs": "^2.2.1",
-    "watchify2": "^0.1.0"
+    "vinyl-fs": "^2.2.1"
   },
   "scripts": {
     "test": "npm run lint && tap test/*.js",

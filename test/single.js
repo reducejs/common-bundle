@@ -16,9 +16,7 @@ test('single', function(t) {
     },
     function () {
       return browserify(['./a.js', './b.js'], { basedir: fixtures('src') })
-        .plugin(commonify, {
-          groups: { output: 'bundle.js' },
-        })
+        .plugin(commonify, 'bundle.js')
         .bundle()
         .pipe(vfs.dest(build))
     },

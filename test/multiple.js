@@ -17,11 +17,8 @@ test('multiple', function(t) {
     function () {
       return browserify(['./a.js', './b.js'], { basedir: fixtures('src') })
         .plugin(commonify, {
-          groups: ['a.js', 'b.js'],
-          common: {
-            filter: ['a.js', 'b.js'],
-            output: 'common.js',
-          },
+          groups: '+(a|b).js',
+          common: 'common.js',
         })
         .bundle()
         .pipe(vfs.dest(build))

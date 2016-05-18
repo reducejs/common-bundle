@@ -6,21 +6,14 @@
 [![devDependencies](https://david-dm.org/reducejs/common-bundle/dev-status.svg)](https://david-dm.org/reducejs/common-bundle#info=devDependencies)
 ![node](https://img.shields.io/node/v/common-bundle.svg)
 
-A [`browserify`] plugin for packing modules into common shared bundles.
+A [browserify] plugin for packing modules into common shared bundles.
 
 **Features**:
 
-* Group one or more entries (modules) together to create a bundle.
-* Extract common modules from bundles to create additional shared bundles.
-* `b.bundle()` generates a stream flowing [`vinyl`] file objects.
+* Powerful control on creating bundles
+* `b.bundle()` generates a stream flowing [vinyl] file objects.
 
 ## Example
-
-**input**:
-
-![input](example/images/input.png)
-
-### One bundle for each page
 
 ```javascript
 var browserify = require('browserify')
@@ -34,6 +27,8 @@ b.plugin('common-bundle', {
   // Pack each index.js and their dependencies into a new bundle
   // e.g. '/path/to/src/page/hi/index.js' => 'page/hi/index.js'
   groups: 'page/**/index.js',
+  // create an additional bundle to hold common moudles shared by all other bundles
+  common: 'common.js',
 })
  
 var vfs = require('vinyl-fs')
@@ -43,12 +38,7 @@ b.bundle().pipe(vfs.dest('/path/to/build'))
 
 ```
 
-**output**:
-
-![one-bundle-for-each-page](example/images/no-common.png)
-
-### One additional bundle shared by all page-specific bundles
-
+Or
 ```javascript
 var browserify = require('browserify')
 var glob = require('glob')
@@ -57,344 +47,256 @@ var basedir = '/path/to/src'
 var entries = glob.sync('page/**/index.js', { cwd: basedir })
 var b = browserify(entries, { basedir: basedir })
  
-b.plugin('common-bundle', {
-  // Pack each index.js and their dependencies into a new bundle
-  // e.g. '/path/to/src/page/hi/index.js' => 'page/hi/index.js'
-  groups: 'page/**/index.js',
+b.plugin('common-bundle', function (entries) { 
+  entries.forEach(function (file) { 
+    // create a new bundle
+    this.add(
+      file,   // path of the new bundle
+      file    // modules (and their dependencies) to hold
+    )
+  }, this)
 
-  common: {
-    // create a common bundle for bundles
-    // whose path matches 'page/**/index.js'
-    // e.g. 'page/hi/index.js', 'page/hello/index.js',
-    // 'page/red/index.js', 'page/green/index.js'
-    output: 'common.js',
-    filter: 'page/**/index.js',
-  },
+  // create a new bundle for sharing modules
+  this.addCommon( 
+    'common.js',  // name of the common bundle
+    'page/**/index.js'  // bundles to share the common bundle
+  )
 })
  
 var vfs = require('vinyl-fs')
+// Write all bundles to the build directory
+// e.g. 'page/hi/index.js' => '/path/to/build/page/hi/index.js'
 b.bundle().pipe(vfs.dest('/path/to/build'))
 
 ```
-
-**output**:
-
-![one-common](example/images/one-common.png)
-
-#### [`factor-bundle`]
-The default output of [`factor-bundle`] would be:
-
-![factor-bundle](example/images/factor-bundle.png)
-
-**NOTE**:
-[`factor-bundle`] may pack modules, that are not needed by some pages, into the common bundle. `common-bundle` will try to make sure every page load only necessary modules.
-
-### Shared bundle for each group of page-specific bundles
-
-```javascript
-var browserify = require('browserify')
-var glob = require('glob')
- 
-var basedir = '/path/to/src'
-var entries = glob.sync('page/**/index.js', { cwd: basedir })
-var b = browserify(entries, { basedir: basedir })
- 
-b.plugin('common-bundle', {
-  groups: 'page/**/index.js',
-
-  common: [
-    {
-      output: 'common-hello-and-hi.js',
-      filter: ['page/hello/index.js', 'page/hi/index.js']
-    },
-    {
-      output: 'common-red-and-green.js',
-      filter: ['page/red/index.js', 'page/green/index.js']
-    },
-  ],
-})
- 
-var vfs = require('vinyl-fs')
-b.bundle().pipe(vfs.dest('/path/to/build'))
-
-```
-
-**output**:
-
-![multiple-commons](example/images/multiple-commons.png)
 
 ## options
+`options` can be specified in three ways:
 
-* [groups](#groups)
-* [common](#common)
+- `String`. Pack all modules into a single bundle.
+- `Object`. Creating bundles according to the `groups` and `common` field. *Default*
+- `Function`. Creating bundles manually.
 
-### groups
-Groups entries (with their dependencies) together
-and create a new bundle for each group.
+### `groups` and `common`
+`options.groups` is used to create bundles for holding specified modules.
 
-Types of possible values:
-* `Object`. [`groups.output`](#groupsoutput), [`groups.filter`](#groupsfilter)
-* `String`. Equivalent to `{ filter: groups }`.
-* `Function`. Equivalent to `{ output: groups }`.
-* `Array`. Elements are treated as a `groups` option and processed one by one.
-
-#### groups.output
-Specify paths to new bundles.
-
-* `String`.
-Should be a path relative to the final build directory.
 ```js
-{
-  // entries like 'page/**/index.js' will be packed into bundle.js
-  output: 'bundle.js',
-  filter: 'page/**/index.js',
+{ 
+  // two bundles will be created
+  // one is 'a.js', to hold the module 'a.js'
+  // the other is 'b.js', to hold the module 'b.js'
+  groups: ['a.js', 'b.js'],
 }
 
 ```
 
-* `Function`.
-`groups.filter` will be ignored. Called with each module file path,
-and the returned value (if any) is used as the file path to the new bundle.
-
+To specify paths (rather than the default) for the created bundles:
 ```js
-{
-  output: function (file) {
-    if (file.endsWith('/page/hi/index.js')) {
-      return 'page/hi/index.js'
-    }
-    if (file.endsWith('/page/hello/index.js')) {
-      return 'page/hello/index.js'
-    }
+{ 
+  // two bundles will be created
+  // one is 'bundle-a.js', to hold the module 'a.js'
+  // the other is 'bundle-b.js', to hold the module 'b.js'
+  groups: { 
+    'bundle-a.js': 'a.js',
+    'bundle-b.js': 'b.js',
   },
 }
 
 ```
 
-* otherwise.
-If a new bundle should be created to contain the module matched by `groups.filter`,
-`path.relative(basedir, moduleFile)` is used as the file path to the new bundle.
-
-#### groups.filter
-Specify the the entries that should go to the new bundle
-
-* `String`, `Array`.
-Passed to [`multimatch`] to test module files.
-Relative patterns will be resolved to absolute paths from [basedir](#basedir).
-
-* `Function`.
-Called with each module file path.
-If `true` returned, that module will be packed into a new bundle.
-
-#### Sugar cases for the groups option
-* `b.plugin('common-bundle', { groups: pattern })` is equivalent to 
-`b.plugin('common-bundle', { groups: { filter: pattern } })`,
-where `pattern` is `String` or `Array`.
-
-* `b.plugin('common-bundle', { groups: fn })` is equivalent to 
-`b.plugin('common-bundle', { groups: { output: fn } })`,
-where `fn` is `Function`.
-
-* `b.plugin('common-bundle', { groups: arr })`, where `arr` is `Array`.
-Each element is processed as a `groups` option.
-
-```javascript
-[
-  {
-    output: 'page/A/index.js',
-    filter: 'page/A/index.js',
-  },
-  {
-    output: 'page/B/index.js',
-    filter: 'page/B/index.js',
-  },
-]
-
-```
-
-### common
-After processing `options.groups`, some *original* bundles have been created.
-
-The original bundles (or some of them)
-may share some common modules.
-We can use `options.common` to create common bundles
-containing those shared modules,
-and remove them from the original bundles.
-
-#### common.output
-Specify the file path to the new common bundle.
-
-Type: `String`
-
+If `options.groups` is omitted, it defaults to the entries input to the bundler.
 ```js
-// Modules shared by all original bundles go to `common.js`
-b.plugin('common-bundle', {
-  common: {
-    // the file path to the new common bundle
-    output: 'common.js',
-    // the filter glob will be used to match original bundles
-    filter: '**/*.js',
-  },
-})
+var browserify = require('browserify')
+var entries = ['a.js', 'b.js']
+var b = browserify(entries, { basedir: '/path/to/src' })
+
+b.plugin('common-bundle')
+// the same with
+// b.plugin('common-bundle', { groups: entries })
 
 ```
 
-#### common.filter
-Specify which bundles to share the new common bundle.
-
-* `String`, `Array`.
-Passed to [`multimatch`] to test bundle files.
-
-* `Function`.
-Receives all the bundles created yet (including common bundles),
-and should return some of them.
-
-* *otherwise*.
-The new common bundle is shared by all bundles created yet.
-
-```js
-b.plugin('common-bundle', { common: 'common.js' })
-
-```
-
-#### common.threshold
-Specify which modules to go to the common bundle.
-
-* `Number`.
-Modules required by the specified amount (or more) of bundles should go to the common bundle.
-This is the default case, and the default value is the aount of all the sharing bundles.
-
-* `Function`.
-Signature: `threshold(file, numberOfRequiringBundles)`.
-If `true` returned, `file` will go to the common bundle.
-
-#### Sugar cases for the common option
-
-* `b.plugin('common-bundle', { common: commonBundle })` is equivalent to
-`b.plugin('common-bundle', { common: { output: commonBundle } })`,
-where `commonBundle` is `String`.
-
-
-#### Multiple common options
-`b.plugin('common-bundle', { common: arr })`, where `arr` is `Array`.
-
-Actually, the common option is used to set the dependency relationship between bundles.
-If bundle `a.js` is declared to depend on `b.js`,
-modules in `b.js` should not be included in `a.js`,
-because 'depend' means that `b.js` should be loaded before `a.js`, so no need to load them again from `a.js`.
-However, if `b.js` does not exist yet,
-it should be created and contain the common modules shared by its dependents in the current configure.
-
-Each element is treated as an `options.common` and processed one by one to create new bundles.
-
+Patterns are also accepted:
 ```js
 {
-  common: [
-    // Declare that both a.js and b.js should depend on common.js
-    // As common.js does not exist, it is created to contain modules shared
-   // by both a.js and b.js
-    {
-      output: 'common.js',
-      filter: ['a.js', 'b.js']
-    },
-
-    // Declare that a.js and c.js should depend on common.js
-    // As common.js already exists, no extra bundle need to be created
-    // But modules in c.js are removed if they are also in common.js
-    // Since a.js has already been declared to depend on common.js in the previous
-    // configure, nothing will happen to it here
-    // In a word, this configure will NOT modify the contents of common.js
-    // It only removes some modules from c.js
-    {
-      output: 'common.js',
-      filter: ['a.js', 'c.js']
-    },
-
-    // declare that b.js and c.js should depend on common.js
-    // they already does, so nothing happens
-    {
-      output: 'common.js',
-      filter: ['b.js', 'c.js']
-    }
-  ]
+  groups: 'page/**/index.js'
 }
 
 ```
 
-### basedir
-Specify the base for relative paths to bundles and module files.
+It is the same with:
+```js
+{
+  groups: modulesMatched
+}
 
-Type: `String`
+```
 
-Default: `b._options.basedir`
+`modulesMatched` is the result of matching the given pattern against all modules.
+Refer to [multimatch] for more information about the pattern.
+
+`options.common` allow you to create a bundle for holding common modules shared by all other bundles.
+```js
+{
+  // one bundle for each entry
+  // an additional bundle for holding modules shared by all entry bundles
+  common: 'common.js'
+}
+
+```
+
+
+### manual control on the process of creating bundles
+If `options` is specified as a function,
+it will be called as a method of the [`BundleFactory`](#bundlefactory).
+
+```js
+// receives the original entries
+function (entries) {
+  entries.forEach(function (file) { 
+    // create a new bundle
+    this.add(
+      file,   // path of the new bundle
+      file    // modules (and their dependencies) to hold
+    )
+  }, this)
+
+  // create a new bundle for sharing modules
+  this.addCommon( 
+    'common.js',  // name of the common bundle
+    this.getBundles()  // bundles to share the common bundle
+  )
+}
+
+```
+
+### BundleFactory
+A `BundleFactory` instance provides some methods to create bundles.
+
+#### add
+
+Signature: `add(bundlePath, modulesToHold)`
+
+Create a new bundle with the path of `bundlePath`.
+All modules specified by `modulesToHold` and their dependencies will go to this bundle.
+
+If `bundlePath` already exists, modules are just added to it.
+
+`modulesToHold` should be paths to modules.
+You can use the `getModules` or `select` method to pick some specific modules in some cases.
+
+#### getModules
+
+Signature: `getModules(patterns)`
+
+Pick some modules from the whole module set.
+
+`patterns` should be accptable by [multimatch]
+
+
+#### getBundles
+
+Signature: `getBundles(patterns)`
+
+Pick some bundles from the whole bundle set.
+
+`patterns` should be accptable by [multimatch]
+
+
+#### select
+
+Signature: `select(bundles, threshold, hasMagic)`
+
+Select modules from some bundles according to `threshold`.
+
+If you are specifying patterns for the bundles,
+the third argument should be `true`.
+
+`threshold` could be `Number`,
+which means modules are picked only when they are shared by more than the specific amount of bundles.
+By default, the picked modules are those shared by all bundles.
+
+If `threshold` is specified as a function,
+it should respect the following signature:
+
+`isPicked = threshold(row, groups)`
+
+`row` is the module representation object.
+You can access the module path by `row.file`.
+
+`groups` is an array of bundles holding `row`.
+
+```js
+// get all bundles
+var targetBundles = this.getBundles()
+this.select(
+  targetBundles,
+  function (row, groups) {
+    // pick row when more than half bundles holding it
+    return groups.length * 2 > targetBundles
+  }
+)
+
+```
+
+#### addCommon
+
+Signature: `addCommon(commonBundlePath, bundlesToShare, threshold)`
+
+Pick some modules by calling `this.select(bundlesToShare, threshold)`,
+and create a bundle with the path of `commonBundlePath` to hold them.
+
+Moreover, the picked modules will be removed from each bundle in `bundlesToShare`.
+
 
 ## Events
 
-### b.on('common.map', (bundleMap, inputMap) => {})
+### b.on('common.map', (o) => {})
+Suppose there are two entries `a.js` and `b.js`, and they both `require('./c')`.
 
-Suppose there are two pages, `hi` and `hello`,
-and both depend upon `lodash` and `say`.
+We use the default options to create two bundles holding `a.js` and `b.js` respectively.
 
-We can use the following options to create a `common.js`,
-and check `bundleMap` and `inputMap`.
-
-```js
-b.plugin('common-bundle', {
-  groups: 'page/**/index.js',
-  common: 'common.js',
-})
-b.on('common.map', function (bundleMap, inputMap) {
-  console.log(JSON.stringify(bundleMap, null, 2))
-  console.log(JSON.stringify(inputMap, null, 2))
-})
-
-```
-
-**bundleMap**
+Then `o` will look like:
 
 ```js
 {
-  // bundle => {}
-  "page/hi/index.js": {
-    // modules in this bundle
-    "modules": [
-      "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/page/hi/index.js"
-    ],
-    // bundles should come before this bundle
-    "deps": [
-      "common.js"
-    ]
+  "bundles": {
+    // bundle path => { modules: [module id], deps: [bundle path] }
+    "a.js": {
+      "modules": [ 3, 1 ],
+      "deps": []
+    },
+    "b.js": {
+      "modules": [ 3, 2 ],
+      "deps": []
+    }
   },
-  "page/hello/index.js": {
-    "modules": [
-      "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/page/hello/index.js"
-    ],
-    "deps": [
-      "common.js"
-    ]
+  "modules": {
+    // module id => { file: module path, bundles: [ [bundles] ] }
+    "1": {
+      "file": "a.js",
+      "bundles": [
+        [ "a.js" ]
+      ]
+    },
+    "2": {
+      "file": "b.js",
+      "bundles": [
+        [ "b.js" ]
+      ]
+    },
+    "3": {
+      "file": "c.js",
+      "bundles": [
+        // load this group of bundles to make c.js available
+        [ "a.js" ],
+        // or load this group
+        [ "b.js" ]
+      ]
+    }
   },
-  "common.js": {
-    "modules": [
-      "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/node_modules/lodash/index.js",
-      "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/web_modules/say/index.js"
-    ]
-  }
-}
-
-```
-
-**inputMap**
-
-```js
-{
-  // input file => [bundles should be loaded to use `input`]
-  "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/page/hello/index.js": [
-    "common.js",
-    "page/hello/index.js"
-  ],
-  "/Users/zoubin/usr/src/reducejs/common-bundle/example/map/src/page/hi/index.js": [
-    "common.js",
-    "page/hi/index.js"
-  ]
+  "entries": [ 1, 2 ],
+  "basedir": "/path/to/src"
 }
 
 ```
@@ -412,76 +314,55 @@ You can call `pipeline.get` with a label name to get a handle on a stream pipeli
 
 Event handlers must be attached *before* calling `b.plugin`.
 
-## Work with [`watchify2`] and [`gulp`]
+## Work with [gulp]
 
-```javascript
-var through = require('through2')
+```js
+var gulp = require('gulp')
 var browserify = require('browserify')
+var del = require('del')
+var glob = require('globby')
+var path = require('path')
 
-gulp.task('build', function() {
-  var b = browserify({ basedir: '/path/to/src' })
-  b.plugin('common-bundle', {
-    // page-specific bundles
-    groups: 'page/**/index.js',
-    // common bundle shared by all pages
-    common: 'common.js',
-  })
-
-  return gulp.src('page/**/index.js', {
-    cwd: b._options.basedir,
-    read: false,
-  })
-  .pipe(through.obj(function (file, _, next) {
-    b.add(file.path)
-    next()
-  }, function (next) {
-    b.bundle()
-      .on('data', file => this.push(file))
-      .on('end', () => this.push(null))
-  }))
-  .pipe(gulp.dest('build'))
+gulp.task('build', function () {
+  del.sync('build')
+  return createBundler().bundle().pipe(gulp.dest('build'))
 })
 
 gulp.task('watch', function (cb) {
-  var b = browserify({ basedir: '/path/to/src' })
+  var b = createBundler()
+    .plugin('watchify2', { entryGlob: 'page/**/index.js' })
+    .on('close', cb)
+    .on('update', bundle)
+  function bundle() {
+    del.sync('build')
+    b.bundle().pipe(gulp.dest('build'))
+  }
+  bundle()
+})
+
+function createBundler() {
+  var basedir = path.resolve(__dirname, 'src')
+  var entries = glob.sync('page/**/index.js', { cwd: basedir })
+  var b = browserify(entries, { basedir: basedir })
   b.plugin('common-bundle', {
-    // page-specific bundles
     groups: 'page/**/index.js',
-    // common bundle shared by all pages
     common: 'common.js',
   })
-
-  b.plugin('watchify2', {
-    // now we can add or remove page entries
-    // and that would cause `b.bundle()` to be executed.
-    entryGlob: 'page/**/index.js',
+  b.on('common.map', function (o) {
+    console.log(
+      'bundles:', Object.keys(o.bundles).length,
+      'modules:', Object.keys(o.modules).length,
+      'entries:', Object.keys(o.entries).length
+    )
   })
-  gulp.src('page/**/index.js', {
-    cwd: b._options.basedir,
-    read: false,
-  })
-  .pipe(through.obj(function (file, _, next) {
-    b.add(file.path)
-    next()
-  }, function (next) {
-    b.on('update', bundle)
-    bundle()
-  }))
+  return b
+}
 
-  function bundle() {
-    b.bundle().pipe(gulp.dest('build'))
-      .on('data', file => console.log('bundle:', file.relative))
-      .on('end', () => console.log('-'.repeat(40)))
-  }
-})
 
 ```
 
-[`browserify`]: https://github.com/substack/node-browserify
-[`factor-bundle`]: https://github.com/substack/factor-bundle
-[`vinyl`]: https://github.com/gulpjs/vinyl
-[`watchify`]: https://github.com/substack/watchify
-[`watchify2`]: https://github.com/reducejs/watchify2
-[`gulp`]: https://github.com/gulpjs/gulp
-[`multimatch`]: https://github.com/sindresorhus/multimatch
+[browserify]: https://github.com/substack/node-browserify
+[vinyl]: https://github.com/gulpjs/vinyl
+[gulp]: https://github.com/gulpjs/gulp
+[multimatch]: https://github.com/sindresorhus/multimatch
 
