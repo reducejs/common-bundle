@@ -3,14 +3,12 @@ module.exports = {
   plugin: [
     // default options
     ['common-bundle', {
-      factor: {
-        // same with
-        // groups: { 'a.js': 'a.js', 'b.js': 'b.js' },
-        // or
-        // groups: '+(a|b).js',
-        groups: ['a.js', 'b.js'],
-        common: 'common.js',
-      },
+      // same with
+      // groups: { 'a.js': 'a.js', 'b.js': 'b.js' },
+      // or
+      // groups: '+(a|b).js',
+      groups: ['a.js', 'b.js'],
+      common: 'common.js',
     }],
   ],
 }

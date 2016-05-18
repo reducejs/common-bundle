@@ -12,10 +12,8 @@ var b = browserify(entries, {
 })
 
 b.plugin('common-bundle', {
-  factor: {
-    groups: 'entry*.js',
-    common: 'common.js',
-  },
+  groups: 'entry*.js',
+  common: 'common.js',
 })
 
 b.plugin('watchify2', { entryGlob: 'entry*.js' })

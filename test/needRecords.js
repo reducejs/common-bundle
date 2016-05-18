@@ -17,9 +17,7 @@ test('needRecords', function(t) {
     function () {
       return browserify(['./a.js', './b.js'], { basedir: fixtures('src') })
         .plugin(commonify, {
-          factor: {
-            common: 'common.js',
-          },
+          common: 'common.js',
         })
         .bundle()
         .pipe(vfs.dest(build))

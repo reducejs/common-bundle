@@ -2,34 +2,15 @@ var mixy = require('mixy')
 var Transform = require('stream').Transform
 var splicer = require('labeled-stream-splicer')
 var File = require('vinyl')
+var browserPack = require('browser-pack')
 
 var createCustomFactory = require('./lib/custom-factor')
 var BundleFactory = require('./lib/bundle-factory')
 var createFileResolver = require('./lib/resolver')
 
-/**
- * opts.basedir: `base` for vinyl objects, `b._options.basedir` by default
- * opts.pack: custom packer, `browser-pack` by default
- * opts.factor: specify how to create factors. See `custom-factor'`
- *
- */
 module.exports = function (b, opts) {
-  var rawOpts = opts
-  opts = opts || {}
-  if (typeof opts === 'string') {
-    opts = {
-      factor: function (inputs) {
-        // single bundle
-        this.add(rawOpts, inputs, false)
-      },
-    }
-  } else if (typeof opts === 'function') {
-    opts = { factor: opts }
-  }
-
-  var basedir = opts.basedir || b._options.basedir || process.cwd()
+  var basedir = b._options.basedir || process.cwd()
   var packOpts = mixy.mix({}, b._options, { raw: true, hasExports: true })
-  var packer = opts.pack || require('browser-pack')
 
   b.on('reset', reset)
   reset()
@@ -49,12 +30,12 @@ module.exports = function (b, opts) {
     }))
     b.pipeline.get('pack').unshift(
       // group rows into bundles
-      createBundleStream(opts.factor, basedir, input),
+      createBundleStream(opts, basedir, input),
       // emit meta info about bundles and rows
       collectMaps({ basedir: basedir, input: input })
         .on('map', b.emit.bind(b, 'common.map')),
       // pack and create a vinyl object for each bundle
-      vinylify({ basedir: basedir, packOpts: packOpts, packer: packer })
+      vinylify({ basedir: basedir, packOpts: packOpts, packer: browserPack })
         .on('pipeline', b.emit.bind(b, 'common.pipeline')),
       through(
         function (file, enc, next) {

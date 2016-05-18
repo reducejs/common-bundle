@@ -3,13 +3,11 @@ module.exports = {
   plugin: [
     // default options
     ['common-bundle', {
-      factor: {
-        groups: {
-          'a.js': ['a.js', 'd.js'],
-          'b.js': 'b.js',
-        },
-        common: 'common.js',
+      groups: {
+        'a.js': ['a.js', 'd.js'],
+        'b.js': 'b.js',
       },
+      common: 'common.js',
     }],
   ],
 }

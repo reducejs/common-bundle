@@ -7,10 +7,8 @@ var fixtures = path.resolve.bind(path, __dirname, 'fixtures', 'src')
 test('map', function(t) {
   var b = browserify(['./a.js', './b.js'], { basedir: fixtures() })
   b.plugin(commonify, {
-    factor: {
-      groups: ['a.js', 'b.js'],
-      common: 'common.js',
-    },
+    groups: ['a.js', 'b.js'],
+    common: 'common.js',
   })
   b.on('common.map', function (o) {
     var bundles = o.bundles

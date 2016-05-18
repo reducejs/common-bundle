@@ -26,10 +26,8 @@ function createBundler() {
   var entries = glob.sync('page/**/index.js', { cwd: basedir })
   var b = browserify(entries, { basedir: basedir })
   b.plugin('common-bundle', {
-    factor: {
-      groups: 'page/**/index.js',
-      common: 'common.js',
-    },
+    groups: 'page/**/index.js',
+    common: 'common.js',
   })
   b.on('common.map', function (o) {
     console.log(
