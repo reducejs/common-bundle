@@ -1,4 +1,24 @@
-<!-- 7d003d8 1461834622000 -->
+<!-- a5f1943 1463568208000 -->
+
+## [v0.5.0](https://github.com/reducejs/common-bundle/commit/a5f1943) (2016-05-18)
+
+* [[`f42e588`](https://github.com/reducejs/common-bundle/commit/f42e588)] fix stream api
+
+* [[`791a8ba`](https://github.com/reducejs/common-bundle/commit/791a8ba)] fix readme style
+
+* [[`3f3253e`](https://github.com/reducejs/common-bundle/commit/3f3253e)] simplify options
+
+* [[`e53034c`](https://github.com/reducejs/common-bundle/commit/e53034c)] Add more tests
+
+* [[`5a019a1`](https://github.com/reducejs/common-bundle/commit/5a019a1)] Adjust map info
+
+* [[`8c35593`](https://github.com/reducejs/common-bundle/commit/8c35593)] Fix: deps, travis 5
+
+* [[`f3788f0`](https://github.com/reducejs/common-bundle/commit/f3788f0)] make eslint happy
+
+* [[`32eaa92`](https://github.com/reducejs/common-bundle/commit/32eaa92)] Refactor
+
+* [[`b5f31a9`](https://github.com/reducejs/common-bundle/commit/b5f31a9)] changelog
 
 ## [v0.4.4](https://github.com/reducejs/common-bundle/commit/7d003d8) (2016-04-28)
 
