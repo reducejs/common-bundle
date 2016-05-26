@@ -21,23 +21,27 @@ module.exports = function (b, opts) {
       function (row, enc, next) { next() },
       function () {}
     )
-    b.pipeline.push(output)
-    b.pipeline.get('record').push(through(function (row, enc, next) {
-      if (row.file) {
-        input.push(row.file)
-      }
-      next(null, row)
-    }))
-    b.pipeline.get('pack').unshift(
+    b.pipeline.push(createPipeline(['output', output], 'common-bundle.wrap'))
+
+    b.pipeline.splice(b.pipeline.indexOf('record') + 1, 0, createPipeline([
+      'record', through(function (row, enc, next) {
+        if (row.file) {
+          input.push(row.file)
+        }
+        next(null, row)
+      }),
+    ], 'common-bundle.record'))
+
+    b.pipeline.splice('pack', 0, createPipeline([
       // group rows into bundles
-      createBundleStream(opts, basedir, input),
+      'group', createBundleStream(opts, basedir, input),
       // emit meta info about bundles and rows
-      collectMaps({ basedir: basedir, input: input })
+      'map', collectMaps({ basedir: basedir, input: input })
         .on('map', b.emit.bind(b, 'common.map')),
       // pack and create a vinyl object for each bundle
-      vinylify({ basedir: basedir, packOpts: packOpts, packer: browserPack })
+      'vinylify', vinylify({ basedir: basedir, packOpts: packOpts, packer: browserPack })
         .on('pipeline', b.emit.bind(b, 'common.pipeline')),
-      through(
+      'wrap', through(
         function (file, enc, next) {
           output.push(file)
           next()
@@ -46,8 +50,8 @@ module.exports = function (b, opts) {
           output.push(null)
           next()
         }
-      )
-    )
+      ),
+    ], 'common-bundle.pack'))
   }
 }
 
@@ -80,10 +84,13 @@ function createBundleStream(opts, basedir, input) {
   return through(write, end)
 }
 
-function through(write, end) {
+function through(write, end, label) {
   var s = Transform({ objectMode: true })
   s._transform = write
   s._flush = end
+  if (label) {
+    s.label = label
+  }
   return s
 }
 
@@ -177,4 +184,10 @@ function collectMaps(opts) {
   }
 
   return through(write, end)
+}
+
+function createPipeline(streams, label) {
+  var res = splicer.obj(streams)
+  res.label = label
+  return res
 }
